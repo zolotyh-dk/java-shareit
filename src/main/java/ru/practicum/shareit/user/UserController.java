@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +14,8 @@ import ru.practicum.shareit.user.dto.UserDto;
 public class UserController {
     final private UserService userService;
 
-    @PutMapping
-    public UserDto save(@RequestBody UserDto userDto) {
+    @PostMapping
+    public UserDto save(@Valid @RequestBody UserDto userDto) {
         log.info("Получен запрос PUT /users на сохранение пользователя {}", userDto);
         final UserDto savedUserDto = userService.save(userDto);
         log.info("В ответ на запрос PUT /users возвращаем пользователя {}", savedUserDto);
