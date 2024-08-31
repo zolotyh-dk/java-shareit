@@ -2,7 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
@@ -15,15 +15,15 @@ import java.util.Set;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private Map<Long, User> userRepository = new HashMap<>();
-    private Set<String> emails = new HashSet<>();
+    private final Map<Long, User> userRepository = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
     private long lastId;
 
     @Override
     public UserDto save(UserDto userDto) {
         if (!isEmailUnique(userDto.getEmail())) {
             log.warn("Email {} уже существует", userDto.getEmail());
-            throw new BadRequestException("Email уже существует");
+            throw new EmailAlreadyExistsException("Email: " + userDto.getEmail() + " уже существует");
         }
 
         final User userToSave = UserMapper.toUser(userDto);
@@ -45,14 +45,14 @@ public class UserServiceImpl implements UserService {
         // Получаем текущего пользователя
         final User currentUser = userRepository.get(id);
         if (currentUser == null) {
-            throw new NotFoundException("Пользователь не найден");
+            throw new NotFoundException("Пользователь c id: " + id + " не найден");
         }
 
         // Проверка уникальности email только если он изменился
         if (!currentUser.getEmail().equals(userToUpdate.getEmail())) {
             if (!isEmailUnique(userToUpdate.getEmail())) {
                 log.warn("Email {} уже существует", userToUpdate.getEmail());
-                throw new BadRequestException("Email уже существует");
+                throw new EmailAlreadyExistsException("Email: " + userToUpdate.getEmail() + " уже существует");
             }
             // Удаляем старый email из emails
             emails.remove(currentUser.getEmail());

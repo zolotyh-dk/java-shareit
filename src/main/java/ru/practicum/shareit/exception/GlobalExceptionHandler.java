@@ -19,30 +19,23 @@ public class GlobalExceptionHandler {
         for (FieldError fieldError : result.getFieldErrors()) {
             errorMessage.append(fieldError.getDefaultMessage()).append("; ");
         }
-        log.error("Ошибка валидации: {}", errorMessage);
+        log.warn("Ошибка валидации: {}", errorMessage);
         ErrorDetails errorDetails = new ErrorDetails(errorMessage.toString());
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> handleNotFoundExceptions(RuntimeException exception) {
-        log.error("Некорректный запрос: {}", exception.getMessage());
-        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handleFilmNotFoundExceptions(RuntimeException exception) {
-        log.error("Ресурс не найден: {}", exception.getMessage());
+    public ResponseEntity<Object> handleNotFoundExceptions(RuntimeException exception) {
+        log.warn("Ресурс не найден: {}", exception.getMessage());
         ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Object> handleEmailAlreadyExistsExceptions(RuntimeException exception) {
-        log.error("Ресурс не найден: {}", exception.getMessage());
+        log.warn(exception.getMessage());
         ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
     record ErrorDetails(String error) {
