@@ -22,13 +22,12 @@ public class UserController {
         return savedDto;
     }
 
-    //Нет аннотации @Valid, т.к. при update postman ожидает, что email = null будет принят без ошибки
     @PatchMapping("/{id}")
     public UserDto update(@RequestBody UserDto dto, @PathVariable long id) {
         dto.setId(id);
         log.info("Получен запрос PATCH /users/{} на обновление пользователя {}", id, dto);
         final UserDto updatedDto = userService.update(dto);
-        log.info("В ответ на запрос PATCH /users возвращаем пользователя {}", updatedDto);
+        log.info("В ответ на запрос PATCH /users/{} возвращаем пользователя {}", id, updatedDto);
         return updatedDto;
     }
 

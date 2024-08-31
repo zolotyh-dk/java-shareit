@@ -6,5 +6,5 @@ public interface ItemService {
 
     ItemDto save(ItemDto dto, long ownerId);
 
-
+    ItemDto update(ItemDto dto, long ownerId);
 }

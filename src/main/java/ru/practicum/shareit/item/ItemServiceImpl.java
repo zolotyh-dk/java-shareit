@@ -3,6 +3,8 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.UnauthorizedAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -33,5 +35,24 @@ public class ItemServiceImpl implements ItemService {
         items.put(id, itemToSave);
         log.info("Сохранили в репозитории вещь {}", itemToSave);
         return ItemMapper.toItemDto(itemToSave);
+    }
+
+    @Override
+    public ItemDto update(ItemDto dto, long ownerId) {
+        final long id = dto.getId();
+        final Item currentItem = items.get(id);
+
+        if (currentItem == null) {
+            throw new NotFoundException("Вещь с id: " + id + " не найдена");
+        }
+
+        if (currentItem.getOwner().getId() != ownerId) {
+            throw new UnauthorizedAccessException("У пользователя с id: " + ownerId + " нет прав на обновление этой вещи.");
+        }
+
+        currentItem.setName(dto.getName());
+        currentItem.setDescription(dto.getDescription());
+        currentItem.setAvailable(dto.getAvailable());
+        return ItemMapper.toItemDto(currentItem);
     }
 }
