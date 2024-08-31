@@ -15,29 +15,29 @@ public class UserController {
     final private UserService userService;
 
     @PostMapping
-    public UserDto save(@Valid @RequestBody UserDto userDto) {
-        log.info("Получен запрос PUT /users на сохранение пользователя {}", userDto);
-        final UserDto savedUserDto = userService.save(userDto);
-        log.info("В ответ на запрос PUT /users возвращаем пользователя {}", savedUserDto);
-        return savedUserDto;
+    public UserDto save(@Valid @RequestBody UserDto dto) {
+        log.info("Получен запрос POST /users на сохранение пользователя {}", dto);
+        final UserDto savedDto = userService.save(dto);
+        log.info("В ответ на запрос POST /users возвращаем пользователя {}", savedDto);
+        return savedDto;
     }
 
     //Нет аннотации @Valid, т.к. при update postman ожидает, что email = null будет принят без ошибки
     @PatchMapping("/{id}")
-    public UserDto update(@RequestBody UserDto userDto, @PathVariable long id) {
-        userDto.setId(id);
-        log.info("Получен запрос PATCH /users/{} на обновление пользователя {}", id, userDto);
-        final UserDto updatedUserDto = userService.update(userDto);
-        log.info("В ответ на запрос PATCH /users возвращаем пользователя {}", updatedUserDto);
-        return updatedUserDto;
+    public UserDto update(@RequestBody UserDto dto, @PathVariable long id) {
+        dto.setId(id);
+        log.info("Получен запрос PATCH /users/{} на обновление пользователя {}", id, dto);
+        final UserDto updatedDto = userService.update(dto);
+        log.info("В ответ на запрос PATCH /users возвращаем пользователя {}", updatedDto);
+        return updatedDto;
     }
 
     @GetMapping("/{id}")
     public UserDto getById(@PathVariable long id) {
         log.info("Получен запрос GET /users/{} на получение пользователя по id", id);
-        final UserDto userDto = userService.getById(id);
-        log.info("В ответ на запрос GET /users/{} возвращаем пользователя {}", id, userDto);
-        return userDto;
+        final UserDto dto = userService.getById(id);
+        log.info("В ответ на запрос GET /users/{} возвращаем пользователя {}", id, dto);
+        return dto;
     }
 
     @DeleteMapping("/{id}")

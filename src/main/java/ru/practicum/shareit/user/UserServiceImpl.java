@@ -15,7 +15,7 @@ import java.util.Set;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final Map<Long, User> userRepository = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private final Set<String> emails = new HashSet<>();
     private long lastId;
 
@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Преобразовали UserDto -> {}", userToSave);
         final long id = ++lastId;
         userToSave.setId(id);
-        userRepository.put(id, userToSave);
+        users.put(id, userToSave);
         emails.add(userToSave.getEmail());
         log.info("Сохранили в репозитории пользователя {}", userToSave);
         return UserMapper.toUserDto(userToSave);
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         final long id = userToUpdate.getId();
 
         // Получаем текущего пользователя
-        final User currentUser = userRepository.get(id);
+        final User currentUser = users.get(id);
         if (currentUser == null) {
             throw new NotFoundException("Пользователь c id: " + id + " не найден");
         }
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
             emails.remove(currentUser.getEmail());
         }
 
-        userRepository.put(id, userToUpdate);
+        users.put(id, userToUpdate);
         emails.add(userToUpdate.getEmail());
         log.info("Обновили в репозитории пользователя {}", userToUpdate);
         return UserMapper.toUserDto(userToUpdate);
@@ -66,14 +66,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getById(long id) {
-        final User user = userRepository.get(id);
+        final User user = users.get(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id: " + id + " не найден.");
+        }
         log.info("Получили из репозитория пользователя {}", user);
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public void delete(long id) {
-        final User deletedUser = userRepository.remove(id);
+        final User deletedUser = users.remove(id);
         if (deletedUser != null) {
             emails.remove(deletedUser.getEmail());
             log.info("Удалили из репозитория пользователя {}", deletedUser);
