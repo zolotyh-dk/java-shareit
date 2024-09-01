@@ -13,4 +13,6 @@ public interface ItemService {
     ItemDto getById(long itemId);
 
     Collection<ItemDto> getAll(long ownerId);
+
+    Collection<ItemDto> getByNameOrDescription(String text);
 }

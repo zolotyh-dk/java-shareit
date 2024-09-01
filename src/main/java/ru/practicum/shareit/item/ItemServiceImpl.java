@@ -12,10 +12,7 @@ import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -76,5 +73,20 @@ public class ItemServiceImpl implements ItemService {
                 .toList();
         log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, allDtos);
         return allDtos;
+    }
+
+    @Override
+    public Collection<ItemDto> getByNameOrDescription(String text) {
+        final String lowerCaseText = text.toLowerCase();
+
+        final Collection<ItemDto> searchedDtos = items.values().stream()
+                .filter(item -> Optional.ofNullable(item.getAvailable()).orElse(false) &&
+                        (Optional.ofNullable(item.getName()).orElse("").toLowerCase().contains(lowerCaseText) ||
+                                Optional.ofNullable(item.getDescription()).orElse("").toLowerCase().contains(lowerCaseText)))
+                .map(ItemMapper::toItemDto)
+                .toList();
+
+        log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, searchedDtos);
+        return searchedDtos;
     }
 }

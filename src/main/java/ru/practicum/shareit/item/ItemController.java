@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/items")
@@ -49,5 +50,16 @@ public class ItemController {
         final Collection<ItemDto> allDtos = itemService.getAll(ownerId);
         log.info("В ответ на запрос GET /items возвращаем все вещи пользователя с id: {}. {}", ownerId, allDtos);
         return allDtos;
+    }
+
+    @GetMapping("/search")
+    public Collection<ItemDto> getByNameOrDescription(@RequestParam String text) {
+        log.info("Получен запрос GET /items/search?text={} на получение вещей по названию или описанию", text);
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
+        final Collection<ItemDto> searchedDtos = itemService.getByNameOrDescription(text);
+        log.info("В ответ на запрос GET /items/search?text={} возвращаем вещи {}", text, searchedDtos);
+        return searchedDtos;
     }
 }
