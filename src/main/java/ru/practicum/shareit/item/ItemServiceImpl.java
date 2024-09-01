@@ -12,7 +12,9 @@ import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -54,5 +56,25 @@ public class ItemServiceImpl implements ItemService {
         currentItem.setDescription(dto.getDescription());
         currentItem.setAvailable(dto.getAvailable());
         return ItemMapper.toItemDto(currentItem);
+    }
+
+    @Override
+    public ItemDto getById(long itemId) {
+        final Item item = items.get(itemId);
+        if (item == null) {
+            throw new NotFoundException("Вещь с id: " + itemId + " не найдена.");
+        }
+        log.info("Получили из репозитория вещь {}", item);
+        return ItemMapper.toItemDto(item);
+    }
+
+    @Override
+    public Collection<ItemDto> getAll(long ownerId) {
+        final List<ItemDto> allDtos = items.values().stream()
+                .filter(item -> item.getOwner().getId() == ownerId)
+                .map(ItemMapper::toItemDto)
+                .toList();
+        log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, allDtos);
+        return allDtos;
     }
 }

@@ -16,7 +16,10 @@ import java.util.Set;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final Map<Long, User> users = new HashMap<>();
+
+    //Храним email'ы в отдельном Set для проверки уникальности за О(1)
     private final Set<String> emails = new HashSet<>();
+
     private long lastId;
 
     @Override

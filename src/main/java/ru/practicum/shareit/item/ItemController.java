@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -14,10 +16,8 @@ public class ItemController {
     final private ItemService itemService;
 
     @PostMapping
-    public ItemDto save(
-            @Valid @RequestBody ItemDto dto,
-            @RequestHeader("X-Sharer-User-Id") long ownerId
-    ) {
+    public ItemDto save(@Valid @RequestBody ItemDto dto,
+                        @RequestHeader("X-Sharer-User-Id") long ownerId) {
         log.info("Получен запрос POST /items на сохранение вещи {}", dto);
         final ItemDto savedDto = itemService.save(dto, ownerId);
         log.info("В ответ на запрос POST /items возвращаем вещь {}", savedDto);
@@ -25,15 +25,29 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(
-            @RequestBody ItemDto dto,
-            @PathVariable long itemId,
-            @RequestHeader("X-Sharer-User-Id") long ownerId
-    ) {
+    public ItemDto update(@RequestBody ItemDto dto,
+                          @PathVariable long itemId,
+                          @RequestHeader("X-Sharer-User-Id") long ownerId) {
         dto.setId(itemId);
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, dto);
         final ItemDto updatedDto = itemService.update(dto, ownerId);
         log.info("В ответ на запрос PATCH /items/{} возвращаем вещь {}", itemId, updatedDto);
         return updatedDto;
+    }
+
+    @GetMapping("/{itemId}")
+    public ItemDto getById(@PathVariable long itemId) {
+        log.info("Получен запрос GET /items/{} на получение вещи по id", itemId);
+        final ItemDto dto = itemService.getById(itemId);
+        log.info("В ответ на запрос GET /items/{} возвращаем вещь {}", itemId, dto);
+        return dto;
+    }
+
+    @GetMapping
+    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
+        log.info("Получен запрос GET /items на получение всех вещей от пользователя с id: {}", ownerId);
+        final Collection<ItemDto> allDtos = itemService.getAll(ownerId);
+        log.info("В ответ на запрос GET /items возвращаем все вещи пользователя с id: {}. {}", ownerId, allDtos);
+        return allDtos;
     }
 }
