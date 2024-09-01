@@ -12,7 +12,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
-    final private UserService userService;
+    private final UserService userService;
 
     @PostMapping
     public UserDto save(@Valid @RequestBody UserDto dto) {

@@ -14,7 +14,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
-    final private ItemService itemService;
+    private final ItemService itemService;
 
     @PostMapping
     public ItemDto save(@Valid @RequestBody ItemDto dto,
