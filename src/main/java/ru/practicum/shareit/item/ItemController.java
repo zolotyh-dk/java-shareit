@@ -55,7 +55,7 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> getByNameOrDescription(@RequestParam String text) {
         log.info("Получен запрос GET /items/search?text={} на получение вещей по названию или описанию", text);
-        if (text.isBlank()) {
+        if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
         final Collection<ItemDto> searchedDtos = itemService.getByNameOrDescription(text);
