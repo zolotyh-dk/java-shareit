@@ -5,8 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemRequest;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemResponse;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -24,76 +25,71 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemDto save(ItemDto dto, long ownerId) {
+    public ItemResponse save(ItemRequest request, long ownerId) {
         final UserDto ownerDto = userService.getById(ownerId);
-        final Item itemToSave = ItemMapper.toItem(dto);
-        itemToSave.setOwner(UserMapper.toUser(ownerDto));
-        log.debug("Преобразовали ItemDto -> {}", itemToSave);
+        final Item item = ItemMapper.toItem(request);
+        item.setOwner(UserMapper.toUser(ownerDto));
+        log.debug("Преобразовали ItemDto -> {}", item);
         final long id = ++lastId;
-        itemToSave.setId(id);
-        items.put(id, itemToSave);
-        log.info("Сохранили в репозитории вещь {}", itemToSave);
-        return ItemMapper.toItemDto(itemToSave);
+        item.setId(id);
+        items.put(id, item);
+        log.info("Сохранили в репозитории вещь {}", item);
+        return ItemMapper.toItemResponse(item);
     }
 
     @Override
-    public ItemDto update(ItemDto dto, long ownerId) {
-        final long id = dto.getId();
-        final Item currentItem = items.get(id);
-
-        if (currentItem == null) {
-            throw new NotFoundException("Вещь с id: " + id + " не найдена");
+    public ItemResponse update(ItemRequest request, long itemId, long ownerId) {
+        final Item item = items.get(itemId);
+        if (item == null) {
+            throw new NotFoundException("Вещь с id: " + itemId + " не найдена");
         }
-
-        if (currentItem.getOwner().getId() != ownerId) {
+        if (item.getOwner().getId() != ownerId) {
             throw new UnauthorizedAccessException("У пользователя с id: " + ownerId + " нет прав на обновление этой вещи.");
         }
-
-        if (dto.getName() != null) {
-            currentItem.setName(dto.getName());
+        if (request.getName() != null) {
+            item.setName(request.getName());
         }
-        if (dto.getDescription() != null) {
-            currentItem.setDescription(dto.getDescription());
+        if (request.getDescription() != null) {
+            item.setDescription(request.getDescription());
         }
-        if (dto.getAvailable() != null) {
-            currentItem.setAvailable(dto.getAvailable());
+        if (request.getAvailable() != null) {
+            item.setAvailable(request.getAvailable());
         }
-
-        return ItemMapper.toItemDto(currentItem);
+        return ItemMapper.toItemResponse(item);
     }
 
     @Override
-    public ItemDto getById(long itemId) {
+    public ItemResponse getById(long itemId) {
         final Item item = items.get(itemId);
         if (item == null) {
             throw new NotFoundException("Вещь с id: " + itemId + " не найдена.");
         }
         log.info("Получили из репозитория вещь {}", item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemResponse(item);
     }
 
     @Override
-    public Collection<ItemDto> getAll(long ownerId) {
-        final List<ItemDto> allDtos = items.values().stream()
+    public Collection<ItemResponse> getAll(long ownerId) {
+        final List<ItemResponse> allItems = items.values().stream()
                 .filter(item -> item.getOwner().getId() == ownerId)
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::toItemResponse)
                 .toList();
-        log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, allDtos);
-        return allDtos;
+        log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, allItems);
+        return allItems;
     }
 
     @Override
-    public Collection<ItemDto> getByNameOrDescription(String text) {
+    public Collection<ItemResponse> getByNameOrDescription(String text) {
         final String lowerCaseText = text.toLowerCase();
 
-        final Collection<ItemDto> searchedDtos = items.values().stream()
+        final Collection<ItemResponse> searchedItems = items.values().stream()
                 .filter(item -> Optional.ofNullable(item.getAvailable()).orElse(false) &&
                         (Optional.ofNullable(item.getName()).orElse("").toLowerCase().contains(lowerCaseText) ||
                                 Optional.ofNullable(item.getDescription()).orElse("").toLowerCase().contains(lowerCaseText)))
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::toItemResponse)
                 .toList();
 
-        log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, searchedDtos);
-        return searchedDtos;
+        log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, searchedItems);
+        return searchedItems;
     }
 }
