@@ -4,7 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequest;
+import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.HashMap;
@@ -16,64 +17,56 @@ import java.util.Set;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final Map<Long, User> users = new HashMap<>();
-
-    //Храним email'ы в отдельном Set для проверки уникальности за О(1)
     private final Set<String> emails = new HashSet<>();
-
     private long lastId;
 
     @Override
-    public UserDto save(UserDto userDto) {
-        if (!isEmailUnique(userDto.getEmail())) {
-            log.warn("Email {} уже существует", userDto.getEmail());
-            throw new EmailAlreadyExistsException("Email: " + userDto.getEmail() + " уже существует");
+    public UserResponse save(UserRequest request) {
+        if (!isEmailUnique(request.getEmail())) {
+            log.warn("Email {} уже существует", request.getEmail());
+            throw new EmailAlreadyExistsException("Email: " + request.getEmail() + " уже существует");
         }
 
-        final User userToSave = UserMapper.toUser(userDto);
+        final User userToSave = UserMapper.requestToUser(request);
         log.debug("Преобразовали UserDto -> {}", userToSave);
         final long id = ++lastId;
         userToSave.setId(id);
         users.put(id, userToSave);
         emails.add(userToSave.getEmail());
         log.info("Сохранили в репозитории пользователя {}", userToSave);
-        return UserMapper.toUserDto(userToSave);
+        return UserMapper.toUserResponse(userToSave);
     }
 
     @Override
-    public UserDto update(UserDto userDto) {
-        final long id = userDto.getId();
-
+    public UserResponse update(UserRequest request, long id) {
         final User currentUser = users.get(id);
         if (currentUser == null) {
             throw new NotFoundException("Пользователь c id: " + id + " не найден");
         }
-
-        if (userDto.getName() != null) {
-            currentUser.setName(userDto.getName());
+        if (request.getName() != null) {
+            currentUser.setName(request.getName());
         }
-
-        if (userDto.getEmail() != null && !currentUser.getEmail().equals(userDto.getEmail())) {
-            if (!isEmailUnique(userDto.getEmail())) {
-                log.warn("Email {} уже существует", userDto.getEmail());
-                throw new EmailAlreadyExistsException("Email: " + userDto.getEmail() + " уже существует");
+        if (request.getEmail() != null && !currentUser.getEmail().equals(request.getEmail())) {
+            if (!isEmailUnique(request.getEmail())) {
+                log.warn("Email {} уже существует", request.getEmail());
+                throw new EmailAlreadyExistsException("Email: " + request.getEmail() + " уже существует");
             }
             emails.remove(currentUser.getEmail());
-            emails.add(userDto.getEmail());
-            currentUser.setEmail(userDto.getEmail());
+            emails.add(request.getEmail());
+            currentUser.setEmail(request.getEmail());
         }
-
         log.info("Обновили в репозитории пользователя {}", currentUser);
-        return UserMapper.toUserDto(currentUser);
+        return UserMapper.toUserResponse(currentUser);
     }
 
     @Override
-    public UserDto getById(long id) {
+    public UserResponse getById(long id) {
         final User user = users.get(id);
         if (user == null) {
             throw new NotFoundException("Пользователь с id: " + id + " не найден.");
         }
         log.info("Получили из репозитория пользователя {}", user);
-        return UserMapper.toUserDto(user);
+        return UserMapper.toUserResponse(user);
     }
 
     @Override

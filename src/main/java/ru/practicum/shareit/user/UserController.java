@@ -4,7 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserRequest;
+import ru.practicum.shareit.user.dto.UserResponse;
 
 
 @RestController
@@ -15,26 +16,25 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto save(@Valid @RequestBody UserDto dto) {
-        log.info("Получен запрос POST /users на сохранение пользователя {}", dto);
-        final UserDto savedDto = userService.save(dto);
-        log.info("В ответ на запрос POST /users возвращаем пользователя {}", savedDto);
-        return savedDto;
+    public UserResponse save(@Valid @RequestBody UserRequest request) {
+        log.info("Получен запрос POST /users на сохранение пользователя {}", request);
+        final UserResponse response = userService.save(request);
+        log.info("В ответ на запрос POST /users возвращаем пользователя {}", response);
+        return response;
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@RequestBody UserDto dto, @PathVariable long id) {
-        log.info("Получен запрос PATCH /users/{} на обновление пользователя {}", id, dto);
-        dto.setId(id);
-        final UserDto updatedDto = userService.update(dto);
-        log.info("В ответ на запрос PATCH /users/{} возвращаем пользователя {}", id, updatedDto);
-        return updatedDto;
+    public UserResponse update(@RequestBody UserRequest request, @PathVariable long id) {
+        log.info("Получен запрос PATCH /users/{} на обновление пользователя {}", id, request);
+        final UserResponse response = userService.update(request, id);
+        log.info("В ответ на запрос PATCH /users/{} возвращаем пользователя {}", id, response);
+        return response;
     }
 
     @GetMapping("/{id}")
-    public UserDto getById(@PathVariable long id) {
+    public UserResponse getById(@PathVariable long id) {
         log.info("Получен запрос GET /users/{} на получение пользователя по id", id);
-        final UserDto dto = userService.getById(id);
+        final UserResponse dto = userService.getById(id);
         log.info("В ответ на запрос GET /users/{} возвращаем пользователя {}", id, dto);
         return dto;
     }

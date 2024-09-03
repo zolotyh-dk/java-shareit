@@ -10,7 +10,7 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemResponse;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.*;
@@ -23,12 +23,11 @@ public class ItemServiceImpl implements ItemService {
     private final Map<Long, Item> items = new HashMap<>();
     private long lastId;
 
-
     @Override
     public ItemResponse save(ItemRequest request, long ownerId) {
-        final UserDto ownerDto = userService.getById(ownerId);
+        final UserResponse owner = userService.getById(ownerId);
         final Item item = ItemMapper.toItem(request);
-        item.setOwner(UserMapper.toUser(ownerDto));
+        item.setOwner(UserMapper.responseToUser(owner));
         log.debug("Преобразовали ItemDto -> {}", item);
         final long id = ++lastId;
         item.setId(id);
