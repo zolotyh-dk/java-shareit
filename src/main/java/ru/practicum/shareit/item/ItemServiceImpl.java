@@ -49,9 +49,16 @@ public class ItemServiceImpl implements ItemService {
             throw new UnauthorizedAccessException("У пользователя с id: " + ownerId + " нет прав на обновление этой вещи.");
         }
 
-        currentItem.setName(dto.getName());
-        currentItem.setDescription(dto.getDescription());
-        currentItem.setAvailable(dto.getAvailable());
+        if (dto.getName() != null) {
+            currentItem.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            currentItem.setDescription(dto.getDescription());
+        }
+        if (dto.getAvailable() != null) {
+            currentItem.setAvailable(dto.getAvailable());
+        }
+
         return ItemMapper.toItemDto(currentItem);
     }
 

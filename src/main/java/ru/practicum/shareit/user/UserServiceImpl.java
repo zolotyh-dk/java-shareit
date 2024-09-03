@@ -41,30 +41,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(UserDto userDto) {
-        final User userToUpdate = UserMapper.toUser(userDto);
-        log.debug("Преобразовали UserDto -> {}", userToUpdate);
-        final long id = userToUpdate.getId();
+        final long id = userDto.getId();
 
-        // Получаем текущего пользователя
         final User currentUser = users.get(id);
         if (currentUser == null) {
             throw new NotFoundException("Пользователь c id: " + id + " не найден");
         }
 
-        // Проверка уникальности email только если он изменился
-        if (!currentUser.getEmail().equals(userToUpdate.getEmail())) {
-            if (!isEmailUnique(userToUpdate.getEmail())) {
-                log.warn("Email {} уже существует", userToUpdate.getEmail());
-                throw new EmailAlreadyExistsException("Email: " + userToUpdate.getEmail() + " уже существует");
-            }
-            // Удаляем старый email из emails
-            emails.remove(currentUser.getEmail());
+        if (userDto.getName() != null) {
+            currentUser.setName(userDto.getName());
         }
 
-        users.put(id, userToUpdate);
-        emails.add(userToUpdate.getEmail());
-        log.info("Обновили в репозитории пользователя {}", userToUpdate);
-        return UserMapper.toUserDto(userToUpdate);
+        if (userDto.getEmail() != null && !currentUser.getEmail().equals(userDto.getEmail())) {
+            if (!isEmailUnique(userDto.getEmail())) {
+                log.warn("Email {} уже существует", userDto.getEmail());
+                throw new EmailAlreadyExistsException("Email: " + userDto.getEmail() + " уже существует");
+            }
+            emails.remove(currentUser.getEmail());
+            emails.add(userDto.getEmail());
+            currentUser.setEmail(userDto.getEmail());
+        }
+
+        log.info("Обновили в репозитории пользователя {}", currentUser);
+        return UserMapper.toUserDto(currentUser);
     }
 
     @Override
