@@ -29,8 +29,8 @@ public class ItemController {
     public ItemDto update(@RequestBody ItemDto dto,
                           @PathVariable long itemId,
                           @RequestHeader("X-Sharer-User-Id") long ownerId) {
-        dto.setId(itemId);
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, dto);
+        dto.setId(itemId);
         final ItemDto updatedDto = itemService.update(dto, ownerId);
         log.info("В ответ на запрос PATCH /items/{} возвращаем вещь {}", itemId, updatedDto);
         return updatedDto;
