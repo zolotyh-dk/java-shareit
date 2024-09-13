@@ -10,9 +10,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
-    @Column(length = 512)
+    @Column(length = 512, unique = true, nullable = false)
     private String email;
 }

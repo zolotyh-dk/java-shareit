@@ -22,9 +22,10 @@ public class Item {
     private Boolean available;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-
+    @OneToOne
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 }
