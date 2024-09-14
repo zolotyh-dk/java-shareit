@@ -7,22 +7,23 @@ import ru.practicum.shareit.user.User;
 
 @Data
 @Entity
+@Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
-    @Column(length = 1024)
+    @Column(nullable = false)
     private String description;
 
-    @Column
+    @Column(nullable = false)
     private Boolean available;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false)
     private User owner;
 
     @OneToOne
