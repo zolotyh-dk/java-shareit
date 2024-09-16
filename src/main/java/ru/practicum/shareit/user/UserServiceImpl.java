@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.dto.UserRequest;
 import ru.practicum.shareit.user.dto.UserResponse;
@@ -29,7 +30,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse update(UserRequest request, long id) {
-        final User currentUser = userRepository.getReferenceById(id);
+        final User currentUser = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден"));
         if (request.getName() != null) {
             currentUser.setName(request.getName());
         }
@@ -46,7 +48,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getById(long id) {
-        final User user = userRepository.getReferenceById(id);
+        final User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден"));
         log.info("Получили из репозитория пользователя {}", user);
         return UserMapper.toUserResponse(user);
     }
