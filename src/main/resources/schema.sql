@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS items
     id           BIGINT GENERATED ALWAYS AS IDENTITY NOT NULL,
     name         VARCHAR(255)                        NOT NULL,
     description  TEXT                                NOT NULL,
-    is_available BOOLEAN DEFAULT FALSE,
+    is_available BOOLEAN                             NOT NULL,
     owner_id     BIGINT                              NOT NULL,
-    request_id   BIGINT                              NOT NULL,
+    request_id   BIGINT,
     CONSTRAINT pk_item PRIMARY KEY (id),
     CONSTRAINT fk_items_to_users FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_items_to_requests FOREIGN KEY (request_id) REFERENCES requests (id)
