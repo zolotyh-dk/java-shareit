@@ -5,21 +5,24 @@ import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
+@Entity
+@Table(name = "bookings")
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
-    private LocalDateTime start;
+    @Column(name = "start_date", nullable = false)
+    private Instant start;
 
-    @Column(nullable = false)
-    private LocalDateTime end;
+    @Column(name = "end_date", nullable = false)
+    private Instant end;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
@@ -28,5 +31,6 @@ public class Booking {
     private User booker;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private BookingStatus status;
 }

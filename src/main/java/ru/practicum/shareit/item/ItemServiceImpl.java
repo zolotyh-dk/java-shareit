@@ -25,7 +25,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemResponse save(ItemRequest request, long ownerId) {
         final UserResponse owner = userService.getById(ownerId);
-        final Item item = ItemMapper.toItem(request);
+        final Item item = ItemMapper.requestToItem(request);
         item.setOwner(UserMapper.responseToUser(owner));
         log.debug("Преобразовали ItemDto -> {}", item);
         final Item savedItem = itemRepository.save(item);

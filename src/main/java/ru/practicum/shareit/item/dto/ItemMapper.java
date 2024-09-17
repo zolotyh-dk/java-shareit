@@ -13,11 +13,20 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemRequest dto) {
+    public static Item requestToItem(ItemRequest request) {
         final Item item = new Item();
-        item.setName(dto.getName());
-        item.setDescription(dto.getDescription());
-        item.setAvailable(dto.getAvailable());
+        item.setName(request.getName());
+        item.setDescription(request.getDescription());
+        item.setAvailable(request.getAvailable());
+        return item;
+    }
+
+    public static Item responseToItem(ItemResponse response) {
+        final Item item = new Item();
+        item.setId(response.getId());
+        item.setName(response.getName());
+        item.setDescription(response.getDescription());
+        item.setAvailable(response.getAvailable());
         return item;
     }
 }

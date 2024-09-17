@@ -45,6 +45,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler({ItemNotAvailable.class, InvalidBookingDateException.class})
+    public ResponseEntity<Object> handleItemNotAvailableException(RuntimeException exception) {
+        log.warn(exception.getMessage());
+        ErrorDetails errorDetails = new ErrorDetails(exception.getMessage());
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
     record ErrorDetails(String error) {
     }
 }
