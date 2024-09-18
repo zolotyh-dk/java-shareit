@@ -1,8 +1,6 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.ItemDetailResponse;
-import ru.practicum.shareit.item.dto.ItemRequest;
-import ru.practicum.shareit.item.dto.ItemResponse;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 
@@ -17,4 +15,6 @@ public interface ItemService {
     Collection<ItemDetailResponse> getAll(long ownerId);
 
     Collection<ItemResponse> getByNameOrDescription(String text);
+
+    CommentResponse addComment(long itemId, long userId, CommentRequest request);
 }

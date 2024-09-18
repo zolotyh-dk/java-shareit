@@ -7,10 +7,7 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
-import ru.practicum.shareit.item.dto.ItemDetailResponse;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.dto.ItemRequest;
-import ru.practicum.shareit.item.dto.ItemResponse;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserMapper;
@@ -108,5 +105,14 @@ public class ItemServiceImpl implements ItemService {
         Collection<Item> items = itemRepository.searchByNameOrDescription(text);
         log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, items);
         return items.stream().map(ItemMapper::toItemResponse).toList();
+    }
+
+    @Override
+    public CommentResponse addComment(long itemId, long userId, CommentRequest request) {
+        List<Booking> bookings = bookingRepository.findByBookerIdPastBookingsOrderByStartDesc(userId, Instant.now());
+        if (bookings.stream().noneMatch(booking -> booking.getItem().getId() == itemId)) {
+            throw new NotFoundException("");
+        }
+        return null;
     }
 }

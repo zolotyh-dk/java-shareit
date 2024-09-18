@@ -4,9 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDetailResponse;
-import ru.practicum.shareit.item.dto.ItemRequest;
-import ru.practicum.shareit.item.dto.ItemResponse;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -62,5 +60,15 @@ public class ItemController {
         final Collection<ItemResponse> items = itemService.getByNameOrDescription(text);
         log.info("В ответ на запрос GET /items/search?text={} возвращаем вещи {}", text, items);
         return items;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponse addComment (@PathVariable long itemId,
+                                                   @RequestHeader("X-Sharer-User-Id") long userId,
+                                                   @Valid @RequestBody CommentRequest request) {
+        log.info("Получен запрос POST /items/{}/comment на добавление комментария", itemId);
+        final CommentResponse response = itemService.addComment(itemId, userId, request);
+        log.info("В ответ на запрос POST /items/{}/comment возвращаем комментарий {}", itemId, response);
+        return response;
     }
 }
