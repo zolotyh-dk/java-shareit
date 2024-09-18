@@ -26,7 +26,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponse update(@RequestBody ItemRequest request,
+    public ItemResponse update(@Valid @RequestBody ItemRequest request,
                                     @PathVariable long itemId,
                                     @RequestHeader("X-Sharer-User-Id") long ownerId) {
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, request);

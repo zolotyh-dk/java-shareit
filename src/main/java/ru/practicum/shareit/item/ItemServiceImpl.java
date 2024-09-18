@@ -5,13 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.InvalidBookingDateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
 import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.dto.UserResponse;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -25,13 +26,15 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
-    private final UserService userService;
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ItemResponse save(ItemRequest request, long ownerId) {
-        final UserResponse owner = userService.getById(ownerId);
+        final User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + ownerId + " не найден"));
         final Item item = ItemMapper.requestToItem(request);
-        item.setOwner(UserMapper.responseToUser(owner));
+        item.setOwner(owner);
         log.debug("Преобразовали ItemDto -> {}", item);
         final Item savedItem = itemRepository.save(item);
         log.info("Сохранили в репозитории вещь {}", savedItem);
@@ -76,13 +79,18 @@ public class ItemServiceImpl implements ItemService {
         final List<Long> itemIds = items.stream().map(Item::getId).toList();
         final List<Booking> bookings = bookingRepository.findByItemIdIn(itemIds);
 
-        // Получаем текущее время
+        // Если я верно понял задание, то вместе с Item возвращаются даты только текущего бронирования
+        // Поэтому фильтрую по дате
         final Instant now = Instant.now();
 
-        // Создаем карту для быстрого доступа к текущим бронированиям по itemId
+        // Создаем мапу для быстрого доступа к текущим бронированиям по itemId
         final Map<Long, List<Booking>> bookingMap = bookings.stream()
                 .filter(booking -> booking.getStart().isBefore(now) && booking.getEnd().isAfter(now))
                 .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+
+        final List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
+        final Map<Long, List<Comment>> commentMap = comments.stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
 
         return items.stream().map(item -> {
             List<Booking> currentBookings = bookingMap.get(item.getId());
@@ -95,7 +103,6 @@ public class ItemServiceImpl implements ItemService {
                     ? currentBookings.get(0).getEnd()
                     : null;
 
-            // Создаем ItemDetailResponse для каждой вещи
             return ItemMapper.toItemDetailResponse(item, startDate, endDate);
         }).toList();
     }
@@ -109,10 +116,17 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentResponse addComment(long itemId, long userId, CommentRequest request) {
-        List<Booking> bookings = bookingRepository.findByBookerIdPastBookingsOrderByStartDesc(userId, Instant.now());
+        final List<Booking> bookings = bookingRepository.findByBookerIdPastBookingsOrderByStartDesc(userId, Instant.now());
         if (bookings.stream().noneMatch(booking -> booking.getItem().getId() == itemId)) {
-            throw new NotFoundException("");
+            throw new InvalidBookingDateException("У пользователя с id = " + userId + " нет завершенных аренд вещи с id = " + itemId);
         }
-        return null;
+        final Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь с id = " + itemId + " не найдена"));
+        final User author = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+        final Comment comment = CommentMapper.toComment(request, item, author);
+        final Comment savedComment = commentRepository.save(comment);
+        log.info("Сохранили в репозитории комментарий {}", savedComment);
+        return CommentMapper.toCommentResponse(comment);
     }
 }

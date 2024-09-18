@@ -2,8 +2,10 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.practicum.shareit.item.model.Comment;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class ItemDetailResponse {
     private Long requestId;
     private Instant startDate;
     private Instant endDate;
+    private List<Comment> comments;
 }
