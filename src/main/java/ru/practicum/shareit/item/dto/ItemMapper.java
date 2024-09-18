@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Item;
 
+import java.time.Instant;
+
 public class ItemMapper {
     public static ItemResponse toItemResponse(Item item) {
         return new ItemResponse(
@@ -10,6 +12,18 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getRequest() != null ? item.getRequest().getId() : null
+        );
+    }
+
+    public static ItemDetailResponse toItemDetailResponse(Item item, Instant start, Instant end) {
+        return new ItemDetailResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getRequest() != null ? item.getRequest().getId() : null,
+                start,
+                end
         );
     }
 

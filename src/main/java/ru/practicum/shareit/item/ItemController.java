@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemDetailResponse;
 import ru.practicum.shareit.item.dto.ItemRequest;
 import ru.practicum.shareit.item.dto.ItemResponse;
 
@@ -45,9 +46,9 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
+    public Collection<ItemDetailResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
         log.info("Получен запрос GET /items на получение всех вещей от пользователя с id: {}", ownerId);
-        final Collection<ItemResponse> allItems = itemService.getAll(ownerId);
+        final Collection<ItemDetailResponse> allItems = itemService.getAll(ownerId);
         log.info("В ответ на запрос GET /items возвращаем все вещи пользователя с id: {}. {}", ownerId, allItems);
         return allItems;
     }

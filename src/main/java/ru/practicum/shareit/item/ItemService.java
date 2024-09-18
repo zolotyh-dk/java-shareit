@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.item.dto.ItemDetailResponse;
 import ru.practicum.shareit.item.dto.ItemRequest;
 import ru.practicum.shareit.item.dto.ItemResponse;
 
@@ -13,7 +14,7 @@ public interface ItemService {
 
     ItemResponse getById(long itemId);
 
-    Collection<ItemResponse> getAll(long ownerId);
+    Collection<ItemDetailResponse> getAll(long ownerId);
 
     Collection<ItemResponse> getByNameOrDescription(String text);
 }

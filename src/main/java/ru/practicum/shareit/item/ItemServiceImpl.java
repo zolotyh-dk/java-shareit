@@ -3,23 +3,31 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
-import ru.practicum.shareit.item.dto.ItemRequest;
+import ru.practicum.shareit.item.dto.ItemDetailResponse;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemRequest;
 import ru.practicum.shareit.item.dto.ItemResponse;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.dto.UserResponse;
 
-import java.util.*;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
     private final UserService userService;
 
     @Override
@@ -62,10 +70,37 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponse> getAll(long ownerId) {
-        Collection<Item> items = itemRepository.findByOwnerId(ownerId);
+    public Collection<ItemDetailResponse> getAll(long ownerId) {
+        // Получаем все вещи пользователя
+        final Collection<Item> items = itemRepository.findByOwnerId(ownerId);
         log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, items);
-        return items.stream().map(ItemMapper::toItemResponse).toList();
+
+        // Получаем все бронирования для этих вещей
+        final List<Long> itemIds = items.stream().map(Item::getId).toList();
+        final List<Booking> bookings = bookingRepository.findByItemIdIn(itemIds);
+
+        // Получаем текущее время
+        final Instant now = Instant.now();
+
+        // Создаем карту для быстрого доступа к текущим бронированиям по itemId
+        final Map<Long, List<Booking>> bookingMap = bookings.stream()
+                .filter(booking -> booking.getStart().isBefore(now) && booking.getEnd().isAfter(now))
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+
+        return items.stream().map(item -> {
+            List<Booking> currentBookings = bookingMap.get(item.getId());
+
+            Instant startDate = currentBookings != null && !currentBookings.isEmpty()
+                    ? currentBookings.get(0).getStart()
+                    : null;
+
+            Instant endDate = currentBookings != null && !currentBookings.isEmpty()
+                    ? currentBookings.get(0).getEnd()
+                    : null;
+
+            // Создаем ItemDetailResponse для каждой вещи
+            return ItemMapper.toItemDetailResponse(item, startDate, endDate);
+        }).toList();
     }
 
     @Override
