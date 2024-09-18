@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.dto.UserResponse;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -64,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse getBooking(long bookingId, long userId) {
+    public BookingResponse getById(long bookingId, long userId) {
         final Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id=" + bookingId + " не найдено"));
         long ownerId = booking.getItem().getOwner().getId();
@@ -77,18 +76,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponse> getBookingsByState(BookingState state, long bookerId) {
+    public Collection<BookingResponse> getByBookerAndState(BookingState state, long bookerId) {
         userService.getById(bookerId);
         Collection<Booking> bookings;
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findCurrentBookings(bookerId, Instant.now());
+                bookings = bookingRepository.findByBookerIdCurrentBookingsOrderByStartDesc(bookerId, Instant.now());
                 break;
             case PAST:
-                bookings = bookingRepository.findPastBookings(bookerId, Instant.now());
+                bookings = bookingRepository.findByBookerIdPastBookingsOrderByStartDesc(bookerId, Instant.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findFutureBookings(bookerId, Instant.now());
+                bookings = bookingRepository.findByBookerIdFutureBookingsOrderByStartDesc(bookerId, Instant.now());
                 break;
             case WAITING:
                 bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING);
@@ -99,6 +98,35 @@ public class BookingServiceImpl implements BookingService {
                 case ALL:
             default:
                 bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId);
+                break;
+        }
+        log.info("Получили из репозитория бронирования {}", bookings);
+        return bookings.stream().map(BookingMapper::toBookingResponse).toList();
+    }
+
+    @Override
+    public Collection<BookingResponse> getByOwnerAndState(BookingState state, long ownerId) {
+        userService.getById(ownerId);
+        Collection<Booking> bookings;
+        switch (state) {
+            case CURRENT:
+                bookings = bookingRepository.findByOwnerIdCurrentBookingsOrderByStartDesc(ownerId, Instant.now());
+                break;
+            case PAST:
+                bookings = bookingRepository.findByOwnerIdPastBookingsOrderByStartDesc(ownerId, Instant.now());
+                break;
+            case FUTURE:
+                bookings = bookingRepository.findByBookerIdFutureBookingsOrderByStartDesc(ownerId, Instant.now());
+                break;
+            case WAITING:
+                bookings = bookingRepository.findByOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING);
+                break;
+            case REJECTED:
+                bookings = bookingRepository.findByOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED);
+                break;
+            case ALL:
+            default:
+                bookings = bookingRepository.findAllByOwnerIdOrderByStartDesc(ownerId);
                 break;
         }
         log.info("Получили из репозитория бронирования {}", bookings);

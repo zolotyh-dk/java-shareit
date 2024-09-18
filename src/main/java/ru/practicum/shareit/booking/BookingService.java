@@ -11,7 +11,9 @@ public interface BookingService {
 
     BookingResponse updateStatus(long bookingId, boolean approved, long ownerId);
 
-    BookingResponse getBooking(long bookingId, long userId);
+    BookingResponse getById(long bookingId, long userId);
 
-    Collection<BookingResponse> getBookingsByState(BookingState state, long userId);
+    Collection<BookingResponse> getByBookerAndState(BookingState state, long bookerId);
+
+    Collection<BookingResponse> getByOwnerAndState(BookingState state, long ownerId);
 }
