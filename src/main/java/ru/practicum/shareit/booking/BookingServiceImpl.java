@@ -34,10 +34,10 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse book(BookingRequest request, long bookerId) {
         if (!request.getStart().isBefore(request.getEnd())) {
             throw new InvalidBookingDateException("Дата начала бронирования = " + request.getStart() +
-                                                  " должна быть раньше даты окончания = " + request.getEnd());
+                    " должна быть раньше даты окончания = " + request.getEnd());
         }
-        final User booker = userRepository.findById(bookerId).
-                orElseThrow(() -> new NotFoundException("Пользователь с id = " + bookerId + " не найден"));
+        final User booker = userRepository.findById(bookerId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + bookerId + " не найден"));
         final Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(() -> new NotFoundException("Вещь с id = " + request.getItemId() + " не найдена"));
         if (!item.getAvailable()) {
@@ -96,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.REJECTED);
                 break;
-                case ALL:
+            case ALL:
             default:
                 bookings = bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId);
                 break;

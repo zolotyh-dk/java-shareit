@@ -63,7 +63,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentResponse addComment (@PathVariable long itemId,
+    public CommentResponse addComment(@PathVariable long itemId,
                                                    @RequestHeader("X-Sharer-User-Id") long userId,
                                                    @Valid @RequestBody CommentRequest request) {
         log.info("Получен запрос POST /items/{}/comment на добавление комментария", itemId);
