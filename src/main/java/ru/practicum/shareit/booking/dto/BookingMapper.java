@@ -28,4 +28,11 @@ public class BookingMapper {
         booking.setStatus(status);
         return booking;
     }
+
+    public static BookingPeriod extractBookingPeriod(Booking booking) {
+        return new BookingPeriod(
+                booking.getStart().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                booking.getEnd().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                );
+    }
 }

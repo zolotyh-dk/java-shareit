@@ -9,12 +9,21 @@ import java.time.Instant;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+
+    // Поиск по пользователю, забронировавшему вещь
     @Query("""
         SELECT b FROM Booking b
         WHERE b.booker.id = ?1 AND b.start <= ?2 AND b.end >= ?2
         ORDER BY b.start DESC
         """)
     List<Booking> findByBookerIdCurrentBookingsOrderByStartDesc(long bookerId, Instant now);
+
+    @Query("""
+        SELECT b FROM Booking b
+        WHERE b.booker.id = ?1 AND b.start > ?2
+        ORDER BY b.start DESC
+        """)
+    List<Booking> findByBookerIdFutureBookingsOrderByStartDesc(long bookerId, Instant now);
 
     @Query("""
         SELECT b FROM Booking b
@@ -27,6 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerIdOrderByStartDesc(long bookerId);
 
+    //Поиск по владельцу вещи
     @Query("""
        SELECT b FROM Booking b
        WHERE b.item.owner.id = ?1 AND b.start <= ?2 AND b.end >= ?2
@@ -36,10 +46,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
         SELECT b FROM Booking b
-        WHERE b.booker.id = ?1 AND b.start > ?2
+        WHERE b.item.owner.id = ?1 AND b.start > ?2
         ORDER BY b.start DESC
         """)
-    List<Booking> findByBookerIdFutureBookingsOrderByStartDesc(long bookerId, Instant now);
+    List<Booking> findByOwnerIdFutureBookingsOrderByStartDesc(long ownerId, Instant now);
 
     @Query("""
        SELECT b FROM Booking b
@@ -62,5 +72,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         """)
     List<Booking> findAllByOwnerIdOrderByStartDesc(long ownerId);
 
-    List<Booking> findByItemIdIn(List<Long> itemIds);
+    List<Booking> findAllByItemIdOrderByStartDesc(long itemId);
 }

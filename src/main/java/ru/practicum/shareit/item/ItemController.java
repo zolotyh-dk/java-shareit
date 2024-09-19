@@ -26,7 +26,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponse update(@Valid @RequestBody ItemRequest request,
+    public ItemResponse update(@RequestBody ItemRequest request,
                                     @PathVariable long itemId,
                                     @RequestHeader("X-Sharer-User-Id") long ownerId) {
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, request);
@@ -36,9 +36,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemResponse getById(@PathVariable long itemId) {
+    public ItemDetailResponse getById(@PathVariable long itemId) {
         log.info("Получен запрос GET /items/{} на получение вещи по id", itemId);
-        final ItemResponse response = itemService.getById(itemId);
+        final ItemDetailResponse response = itemService.getById(itemId);
         log.info("В ответ на запрос GET /items/{} возвращаем вещь {}", itemId, response);
         return response;
     }

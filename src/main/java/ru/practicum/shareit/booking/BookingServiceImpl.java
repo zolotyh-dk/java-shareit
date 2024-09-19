@@ -3,20 +3,20 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.*;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingRequest;
+import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.enums.BookingState;
 import ru.practicum.shareit.booking.enums.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.InvalidBookingDateException;
 import ru.practicum.shareit.exception.ItemNotAvailable;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.dto.ItemResponse;
-import ru.practicum.shareit.user.UserService;
-import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.dto.UserResponse;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -26,8 +26,8 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
-    private final UserService userService;
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -36,17 +36,14 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidBookingDateException("Дата начала бронирования = " + request.getStart() +
                                                   " должна быть раньше даты окончания = " + request.getEnd());
         }
-        final UserResponse booker = userService.getById(bookerId);
-        final ItemResponse item = itemService.getById(request.getItemId());
+        final User booker = userRepository.findById(bookerId).
+                orElseThrow(() -> new NotFoundException("Пользователь с id = " + bookerId + " не найден"));
+        final Item item = itemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new NotFoundException("Вещь с id = " + request.getItemId() + " не найдена"));
         if (!item.getAvailable()) {
             throw new ItemNotAvailable("Вещь c id=" + item.getId() + " не доступна для бронирования");
         }
-        final Booking booking = BookingMapper.toBooking(
-                request,
-                ItemMapper.responseToItem(item),
-                UserMapper.responseToUser(booker),
-                BookingStatus.WAITING
-        );
+        final Booking booking = BookingMapper.toBooking(request, item, booker, BookingStatus.WAITING);
         log.debug("Преобразовали BookingRequest -> {}", booking);
         bookingRepository.save(booking);
         log.info("Сохранили в репозитории бронирование {}", booking);
@@ -80,7 +77,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingResponse> getByBookerAndState(BookingState state, long bookerId) {
-        userService.getById(bookerId);
+        userRepository.findById(bookerId).orElseThrow(() ->
+                new NotFoundException("Польщователь с id = " + bookerId + " не найден"));
         Collection<Booking> bookings;
         switch (state) {
             case CURRENT:
@@ -109,7 +107,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingResponse> getByOwnerAndState(BookingState state, long ownerId) {
-        userService.getById(ownerId);
+        userRepository.findById(ownerId).orElseThrow(() ->
+                new NotFoundException("Польщователь с id = " + ownerId + " не найден"));
         Collection<Booking> bookings;
         switch (state) {
             case CURRENT:
@@ -119,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
                 bookings = bookingRepository.findByOwnerIdPastBookingsOrderByStartDesc(ownerId, Instant.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerIdFutureBookingsOrderByStartDesc(ownerId, Instant.now());
+                bookings = bookingRepository.findByOwnerIdFutureBookingsOrderByStartDesc(ownerId, Instant.now());
                 break;
             case WAITING:
                 bookings = bookingRepository.findByOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING);
@@ -135,6 +134,4 @@ public class BookingServiceImpl implements BookingService {
         log.info("Получили из репозитория бронирования {}", bookings);
         return bookings.stream().map(BookingMapper::toBookingResponse).toList();
     }
-
-
 }

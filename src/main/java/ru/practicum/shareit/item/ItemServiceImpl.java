@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingPeriod;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.InvalidBookingDateException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -62,11 +64,35 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponse getById(long itemId) {
+    public ItemDetailResponse getById(long itemId) {
+        // Получаем вещь по идентификатору
         final Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с id: " + itemId + " не найдена."));
         log.info("Получили из репозитория вещь {}", item);
-        return ItemMapper.toItemResponse(item);
+
+        // Получаем комментарии для этой вещи
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
+        log.info("Получили комментарии для вещи с id {}: {}", itemId, comments);
+
+        // Получаем все бронирования для этой вещи
+        List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStartDesc(itemId);
+        final Instant now = Instant.now();
+        BookingPeriod lastBooking = null;
+        BookingPeriod nextBooking = null;
+
+        for (Booking booking : bookings) {
+            if ((booking.getStart().isBefore(now) && booking.getEnd().isAfter(now))) {
+                lastBooking = BookingMapper.extractBookingPeriod(booking);
+                break;
+            }
+
+            if (booking.getStart().isAfter(now)) {
+                nextBooking = BookingMapper.extractBookingPeriod(booking);
+            }
+        }
+
+        // Возвращаем ItemDetailResponse с комментариями и информацией о бронированиях
+        return ItemMapper.toItemDetailResponse(item, lastBooking, nextBooking, comments);
     }
 
     @Override
@@ -75,35 +101,44 @@ public class ItemServiceImpl implements ItemService {
         final Collection<Item> items = itemRepository.findByOwnerId(ownerId);
         log.info("Получили из репозитория все вещи пользователя с id: {}. {}", ownerId, items);
 
-        // Получаем все бронирования для этих вещей
         final List<Long> itemIds = items.stream().map(Item::getId).toList();
-        final List<Booking> bookings = bookingRepository.findByItemIdIn(itemIds);
 
-        // Если я верно понял задание, то вместе с Item возвращаются даты только текущего бронирования
-        // Поэтому фильтрую по дате
-        final Instant now = Instant.now();
-
-        // Создаем мапу для быстрого доступа к текущим бронированиям по itemId
-        final Map<Long, List<Booking>> bookingMap = bookings.stream()
-                .filter(booking -> booking.getStart().isBefore(now) && booking.getEnd().isAfter(now))
-                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
-
-        final List<Comment> comments = commentRepository.findByItemIdIn(itemIds);
-        final Map<Long, List<Comment>> commentMap = comments.stream()
+        // Получаем все комменты для этих вещей
+        final Map<Long, List<Comment>> itemIdCommentsMap = commentRepository.findByItemIdIn(itemIds)
+                .stream()
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
 
+        // Получаем все бронирования вещей этого владельца
+        final Map<Long, List<Booking>> itemIdBookingsMap = bookingRepository.findAllByOwnerIdOrderByStartDesc(ownerId)
+                .stream()
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+
         return items.stream().map(item -> {
-            List<Booking> currentBookings = bookingMap.get(item.getId());
+            long itemId = item.getId();
+            List<Comment> comments = itemIdCommentsMap.get(itemId);
 
-            Instant startDate = currentBookings != null && !currentBookings.isEmpty()
-                    ? currentBookings.get(0).getStart()
-                    : null;
+            List<Booking> bookings = itemIdBookingsMap.get(itemId);
+            BookingPeriod lastBooking = null;
+            BookingPeriod nextBooking = null;
+            Instant now = Instant.now();
 
-            Instant endDate = currentBookings != null && !currentBookings.isEmpty()
-                    ? currentBookings.get(0).getEnd()
-                    : null;
+            if (bookings != null && !bookings.isEmpty()) {
+                // Обходим все бронирования и находим lastBooking и nextBooking
+                for (Booking booking : bookings) {
+                    // Проверка для lastBooking (бронирование, которое завершилось в прошлом или идет сейчас)
+                    if (booking.getStart().isBefore(now) && booking.getEnd().isAfter(now)) {
+                        lastBooking = BookingMapper.extractBookingPeriod(booking);
+                        break; // Если мы нашли lastBooking в отсортированном ByStartDesc списке,
+                               // то nextBooking тоже уже нашли или не найдем вовсе
+                    }
 
-            return ItemMapper.toItemDetailResponse(item, startDate, endDate);
+                    // Проверка для nextBooking (бронирование, которое начинается в будущем)
+                    if (booking.getStart().isAfter(now)) {
+                        nextBooking = BookingMapper.extractBookingPeriod(booking);
+                    }
+                }
+            }
+            return ItemMapper.toItemDetailResponse(item, lastBooking, nextBooking, comments);
         }).toList();
     }
 

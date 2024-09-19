@@ -10,7 +10,7 @@ public interface ItemService {
 
     ItemResponse update(ItemRequest request, long itemId, long ownerId);
 
-    ItemResponse getById(long itemId);
+    ItemDetailResponse getById(long itemId);
 
     Collection<ItemDetailResponse> getAll(long ownerId);
 
