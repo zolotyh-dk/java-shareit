@@ -1,19 +1,22 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.BookingRepository;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingPeriod;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.InvalidBookingDateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
@@ -64,6 +68,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDetailResponse getById(long itemId) {
         // Получаем вещь по идентификатору
         final Item item = itemRepository.findById(itemId)
@@ -85,7 +90,6 @@ public class ItemServiceImpl implements ItemService {
                 lastBooking = BookingMapper.extractBookingPeriod(booking);
                 break;
             }
-
             if (booking.getStart().isAfter(now)) {
                 nextBooking = BookingMapper.extractBookingPeriod(booking);
             }
@@ -96,6 +100,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<ItemDetailResponse> getAll(long ownerId) {
         // Получаем все вещи пользователя
         final Collection<Item> items = itemRepository.findByOwnerId(ownerId);
@@ -131,7 +136,6 @@ public class ItemServiceImpl implements ItemService {
                         break; // Если мы нашли lastBooking в отсортированном ByStartDesc списке,
                                // то nextBooking тоже уже нашли или не найдем вовсе
                     }
-
                     // Проверка для nextBooking (бронирование, которое начинается в будущем)
                     if (booking.getStart().isAfter(now)) {
                         nextBooking = BookingMapper.extractBookingPeriod(booking);
@@ -143,6 +147,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<ItemResponse> getByNameOrDescription(String text) {
         Collection<Item> items = itemRepository.searchByNameOrDescription(text);
         log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, items);

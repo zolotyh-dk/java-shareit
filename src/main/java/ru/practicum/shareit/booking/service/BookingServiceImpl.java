@@ -1,8 +1,10 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingRequest;
 import ru.practicum.shareit.booking.dto.BookingResponse;
@@ -13,9 +15,9 @@ import ru.practicum.shareit.exception.InvalidBookingDateException;
 import ru.practicum.shareit.exception.ItemNotAvailable;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
@@ -24,6 +26,7 @@ import java.util.Collection;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
@@ -63,6 +66,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingResponse getById(long bookingId, long userId) {
         final Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id=" + bookingId + " не найдено"));
@@ -76,6 +80,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<BookingResponse> getByBookerAndState(BookingState state, long bookerId) {
         userRepository.findById(bookerId).orElseThrow(() ->
                 new NotFoundException("Польщователь с id = " + bookerId + " не найден"));
@@ -106,6 +111,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<BookingResponse> getByOwnerAndState(BookingState state, long ownerId) {
         userRepository.findById(ownerId).orElseThrow(() ->
                 new NotFoundException("Польщователь с id = " + ownerId + " не найден"));

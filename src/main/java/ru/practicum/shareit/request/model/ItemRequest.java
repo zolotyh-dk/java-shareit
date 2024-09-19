@@ -17,7 +17,7 @@ public class ItemRequest {
     @Column
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "requestor_id")
     private User requestor;
 
