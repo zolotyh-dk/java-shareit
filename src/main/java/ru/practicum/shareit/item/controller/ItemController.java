@@ -10,6 +10,8 @@ import ru.practicum.shareit.item.service.ItemService;
 import java.util.Collection;
 import java.util.Collections;
 
+import static ru.practicum.shareit.HeaderConstants.X_SHARER_USER_ID;
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class ItemController {
 
     @PostMapping
     public ItemResponse save(@Valid @RequestBody ItemRequest request,
-                             @RequestHeader("X-Sharer-User-Id") long ownerId) {
+                             @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос POST /items на сохранение вещи {}", request);
         final ItemResponse response = itemService.save(request, ownerId);
         log.info("В ответ на запрос POST /items возвращаем вещь {}", response);
@@ -29,7 +31,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemResponse update(@RequestBody ItemRequest request,
                                     @PathVariable long itemId,
-                                    @RequestHeader("X-Sharer-User-Id") long ownerId) {
+                                    @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, request);
         final ItemResponse response = itemService.update(request, itemId, ownerId);
         log.info("В ответ на запрос PATCH /items/{} возвращаем вещь {}", itemId, response);
@@ -45,7 +47,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDetailResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
+    public Collection<ItemDetailResponse> getAll(@RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос GET /items на получение всех вещей от пользователя с id: {}", ownerId);
         final Collection<ItemDetailResponse> allItems = itemService.getAll(ownerId);
         log.info("В ответ на запрос GET /items возвращаем все вещи пользователя с id: {}. {}", ownerId, allItems);
@@ -65,7 +67,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentResponse addComment(@PathVariable long itemId,
-                                                   @RequestHeader("X-Sharer-User-Id") long userId,
+                                                   @RequestHeader(X_SHARER_USER_ID) long userId,
                                                    @Valid @RequestBody CommentRequest request) {
         log.info("Получен запрос POST /items/{}/comment на добавление комментария", itemId);
         final CommentResponse response = itemService.addComment(itemId, userId, request);
