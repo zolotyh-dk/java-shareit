@@ -36,16 +36,21 @@ public class UserServiceImpl implements UserService {
     public UserResponse update(UserRequest request, long id) {
         final User currentUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден"));
-        if (request.getName() != null) {
-            currentUser.setName(request.getName());
+
+        final String newName = request.getName();
+        if (newName != null && !newName.isBlank()) {
+            currentUser.setName(newName);
         }
-        if (request.getEmail() != null && !currentUser.getEmail().equals(request.getEmail())) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                log.warn("Email: {} уже существует", request.getEmail());
-                throw new EmailAlreadyExistsException("Email: " + request.getEmail() + " уже существует");
+
+        final String newEmail = request.getEmail();
+        if (newEmail != null && !currentUser.getEmail().equals(newEmail) && !newEmail.isBlank()) {
+            if (userRepository.existsByEmail(newEmail)) {
+                log.warn("Email: {} уже существует", newEmail);
+                throw new EmailAlreadyExistsException("Email: " + newEmail + " уже существует");
             }
-            currentUser.setEmail(request.getEmail());
+            currentUser.setEmail(newEmail);
         }
+
         log.info("Обновили в репозитории пользователя {}", currentUser);
         return UserMapper.toUserResponse(currentUser);
     }
