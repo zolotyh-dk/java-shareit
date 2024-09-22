@@ -21,6 +21,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -146,7 +147,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public Collection<ItemResponse> getByNameOrDescription(String text) {
-        Collection<Item> items = itemRepository.searchByNameOrDescription(text);
+        if (text.isBlank()) {
+            log.info("Получили в запросе пустую строку, возвращаем пустой список");
+            return Collections.emptyList();
+        }
+        final Collection<Item> items = itemRepository.searchByNameOrDescription(text);
         log.info("Получили из репозитория вещи доступные для аренды по запросу: {}. {}", text, items);
         return items.stream().map(ItemMapper::toItemResponse).toList();
     }
