@@ -3,9 +3,12 @@ package ru.practicum.shareit.item.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.validation.Create;
+import ru.practicum.shareit.validation.Update;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +23,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemResponse save(@Valid @RequestBody ItemRequest request,
+    public ItemResponse save(@Validated(Create.class) @RequestBody ItemRequest request,
                              @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос POST /items на сохранение вещи {}", request);
         final ItemResponse response = itemService.save(request, ownerId);
@@ -29,9 +32,9 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponse update(@RequestBody ItemRequest request,
-                                    @PathVariable long itemId,
-                                    @RequestHeader(X_SHARER_USER_ID) long ownerId) {
+    public ItemResponse update(@Validated(Update.class) @RequestBody ItemRequest request,
+                               @PathVariable long itemId,
+                               @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, request);
         final ItemResponse response = itemService.update(request, itemId, ownerId);
         log.info("В ответ на запрос PATCH /items/{} возвращаем вещь {}", itemId, response);
@@ -67,8 +70,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentResponse addComment(@PathVariable long itemId,
-                                                   @RequestHeader(X_SHARER_USER_ID) long userId,
-                                                   @Valid @RequestBody CommentRequest request) {
+                                      @RequestHeader(X_SHARER_USER_ID) long userId,
+                                      @Valid @RequestBody CommentRequest request) {
         log.info("Получен запрос POST /items/{}/comment на добавление комментария", itemId);
         final CommentResponse response = itemService.addComment(itemId, userId, request);
         log.info("В ответ на запрос POST /items/{}/comment возвращаем комментарий {}", itemId, response);
