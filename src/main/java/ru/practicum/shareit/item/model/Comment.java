@@ -1,12 +1,17 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"item", "author"})
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -27,4 +32,16 @@ public class Comment {
 
     @Column(nullable = false)
     private Instant created = Instant.now();
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Comment comment)) return false;
+        return Objects.equals(id, comment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
