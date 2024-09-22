@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
@@ -7,8 +8,9 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.ZoneId;
 
+@UtilityClass
 public class BookingMapper {
-    public static BookingResponse toBookingResponse(Booking booking) {
+    public BookingResponse toBookingResponse(Booking booking) {
         return new BookingResponse(
                 booking.getId(),
                 booking.getStart().atZone(ZoneId.systemDefault()).toLocalDateTime(),
@@ -19,7 +21,7 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(BookingRequest request, Item item, User booker, BookingStatus status) {
+    public Booking toBooking(BookingRequest request, Item item, User booker, BookingStatus status) {
         final Booking booking = new Booking();
         booking.setItem(item);
         booking.setStart(request.getStart().atZone(ZoneId.systemDefault()).toInstant());
@@ -29,7 +31,7 @@ public class BookingMapper {
         return booking;
     }
 
-    public static BookingPeriod extractBookingPeriod(Booking booking) {
+    public BookingPeriod extractBookingPeriod(Booking booking) {
         return new BookingPeriod(
                 booking.getStart().atZone(ZoneId.systemDefault()).toLocalDateTime(),
                 booking.getEnd().atZone(ZoneId.systemDefault()).toLocalDateTime()

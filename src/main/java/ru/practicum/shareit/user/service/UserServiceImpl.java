@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailAlreadyExistsException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.dto.UserRequest;
 import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 @Service
 @Slf4j
