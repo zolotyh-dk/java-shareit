@@ -1,9 +1,11 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.enums.BookingStatus;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.ZoneId;
@@ -15,8 +17,8 @@ public class BookingMapper {
                 booking.getId(),
                 booking.getStart().atZone(ZoneId.systemDefault()).toLocalDateTime(),
                 booking.getEnd().atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                booking.getItem(),
-                booking.getBooker(),
+                ItemMapper.toItemResponse(booking.getItem()),
+                UserMapper.toUserResponse(booking.getBooker()),
                 booking.getStatus()
         );
     }
