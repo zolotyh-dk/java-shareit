@@ -151,8 +151,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentResponse addComment(long itemId, long userId, CommentRequest request) {
-        final List<Booking> bookings = bookingRepository.findByBookerIdPastBookingsOrderByStartDesc(userId, Instant.now());
-        if (bookings.stream().noneMatch(booking -> booking.getItem().getId() == itemId)) {
+        boolean hasPastBookings = bookingRepository.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, Instant.now());
+        if (!hasPastBookings) {
             throw new InvalidBookingDateException("У пользователя с id = " + userId + " нет завершенных аренд вещи с id = " + itemId);
         }
         final Item item = itemRepository.findById(itemId)
