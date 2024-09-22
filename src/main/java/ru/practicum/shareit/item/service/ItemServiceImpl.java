@@ -120,23 +120,18 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream().map(item -> {
             long itemId = item.getId();
-            List<Comment> comments = itemIdCommentsMap.get(itemId);
-
-            List<Booking> bookings = itemIdBookingsMap.get(itemId);
+            List<Comment> comments = itemIdCommentsMap.getOrDefault(itemId, List.of());
+            List<Booking> bookings = itemIdBookingsMap.getOrDefault(itemId, List.of());
             BookingPeriod lastBooking = null;
             BookingPeriod nextBooking = null;
             Instant now = Instant.now();
 
-            if (bookings != null && !bookings.isEmpty()) {
-                // Обходим все бронирования и находим lastBooking и nextBooking
+            if (!bookings.isEmpty()) {
                 for (Booking booking : bookings) {
-                    // Проверка для lastBooking (бронирование, которое завершилось в прошлом или идет сейчас)
                     if (booking.getStart().isBefore(now) && booking.getEnd().isAfter(now)) {
                         lastBooking = BookingMapper.extractBookingPeriod(booking);
-                        break; // Если мы нашли lastBooking в отсортированном ByStartDesc списке,
-                               // то nextBooking тоже уже нашли или не найдем вовсе
+                        break;
                     }
-                    // Проверка для nextBooking (бронирование, которое начинается в будущем)
                     if (booking.getStart().isAfter(now)) {
                         nextBooking = BookingMapper.extractBookingPeriod(booking);
                     }
