@@ -28,7 +28,7 @@ public class ItemMapper {
                 item.getRequest() != null ? item.getRequest().getId() : null,
                 last,
                 next,
-                comments
+                comments != null ? comments.stream().map(CommentMapper::toCommentResponse).toList() : null
         );
     }
 
