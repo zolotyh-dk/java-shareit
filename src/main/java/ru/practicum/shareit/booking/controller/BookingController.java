@@ -48,7 +48,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingResponse> getByBookerAndState(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
+    public Collection<BookingResponse> getByBookerAndState(@RequestParam(defaultValue = "ALL") BookingState state,
                                                           @RequestHeader(X_SHARER_USER_ID) long bookerId) {
         log.info("Получен запрос на получение бронирований GET /bookings?state={} для пользователя id={}", state, bookerId);
         final Collection<BookingResponse> bookings = bookingService.getByBookerAndState(state, bookerId);
@@ -57,7 +57,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public Collection<BookingResponse> getByOwnerAndState(@RequestParam(required = false, defaultValue = "ALL") BookingState state,
+    public Collection<BookingResponse> getByOwnerAndState(@RequestParam(defaultValue = "ALL") BookingState state,
                                                           @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос на получение бронирований GET /bookings/owner?state={} для пользователя id={}", state, ownerId);
         final Collection<BookingResponse> bookings = bookingService.getByOwnerAndState(state, ownerId);
