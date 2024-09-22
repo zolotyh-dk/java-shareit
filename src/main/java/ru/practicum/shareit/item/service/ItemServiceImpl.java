@@ -54,11 +54,13 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId() != ownerId) {
             throw new UnauthorizedAccessException("У пользователя с id: " + ownerId + " нет прав на обновление этой вещи.");
         }
-        if (request.getName() != null) {
-            item.setName(request.getName());
+        final String newName = request.getName();
+        if (newName != null && !newName.isBlank()) {
+            item.setName(newName);
         }
-        if (request.getDescription() != null) {
-            item.setDescription(request.getDescription());
+        final String newDescription = request.getDescription();
+        if (newDescription != null && !newDescription.isBlank()) {
+            item.setDescription(newDescription);
         }
         if (request.getAvailable() != null) {
             item.setAvailable(request.getAvailable());
