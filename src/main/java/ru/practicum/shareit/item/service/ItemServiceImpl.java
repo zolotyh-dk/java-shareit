@@ -128,16 +128,13 @@ public class ItemServiceImpl implements ItemService {
             BookingPeriod lastBooking = null;
             BookingPeriod nextBooking = null;
             Instant now = Instant.now();
-
-            if (!bookings.isEmpty()) {
-                for (Booking booking : bookings) {
-                    if (booking.getStart().isBefore(now) && booking.getEnd().isAfter(now)) {
-                        lastBooking = BookingMapper.extractBookingPeriod(booking);
-                        break;
-                    }
-                    if (booking.getStart().isAfter(now)) {
-                        nextBooking = BookingMapper.extractBookingPeriod(booking);
-                    }
+            for (Booking booking : bookings) {
+                if (booking.getStart().isBefore(now) && booking.getEnd().isAfter(now)) {
+                    lastBooking = BookingMapper.extractBookingPeriod(booking);
+                    break;
+                }
+                if (booking.getStart().isAfter(now)) {
+                    nextBooking = BookingMapper.extractBookingPeriod(booking);
                 }
             }
             return ItemMapper.toItemDetailResponse(item, lastBooking, nextBooking, comments);
