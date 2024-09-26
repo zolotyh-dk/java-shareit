@@ -1,8 +1,8 @@
 package ru.practicum.shareit.request.service;
 
-import ru.practicum.shareit.request.dto.ItemRequestRequest;
-import ru.practicum.shareit.request.dto.ItemRequestResponse;
+import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
+import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 
 public interface ItemRequestService {
-    ItemRequestResponse save(ItemRequestRequest request, long requestorId);
+    ItemRequestResponseDto save(ItemRequestCreateDto request, long requestorId);
 }

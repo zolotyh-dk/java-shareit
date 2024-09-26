@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class ItemRequestResponse {
+public class ItemRequestResponseDto {
     private long id;
     private String description;
     private LocalDateTime created;
