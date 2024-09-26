@@ -10,7 +10,6 @@ import ru.practicum.shareit.request.dto.ItemRequestResponseWithItems;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.Collection;
-import java.util.List;
 
 import static ru.practicum.shareit.HeaderConstants.X_SHARER_USER_ID;
 
@@ -33,8 +32,26 @@ public class ItemRequestController {
     @GetMapping
     public Collection<ItemRequestResponseWithItems> getAllByRequestor(@RequestHeader(X_SHARER_USER_ID) long requestorId) {
         log.info("Получен запрос GET /requests на получение запросов вещией от пользователя с id={}", requestorId);
-        final Collection<ItemRequestResponseWithItems> allRequests = requestService.getAllByRequestor(requestorId);
-        log.info("В ответ на запрос GET /requests возвращаем все запросы вещией {}", allRequests);
+        final Collection<ItemRequestResponseWithItems> requestsByUser = requestService.getAllByRequestor(requestorId);
+        log.info("В ответ на запрос GET /requests возвращаем все запросы вещей от пользователя с id={} {}",
+                requestorId, requestsByUser);
+        return requestsByUser;
+    }
+
+    @GetMapping("/all")
+    public Collection<ItemRequestResponse> getAll(@RequestHeader(X_SHARER_USER_ID) long userId) {
+        log.info("Получен запрос GET /requests/all на получение всех запросов вещией от пользователя с id={}", userId);
+        final Collection<ItemRequestResponse> allRequests = requestService.getAll(userId);
+        log.info("В ответ на запрос GET /requests/all возвращаем все запросы вещей {}", allRequests);
         return allRequests;
+    }
+
+    @GetMapping("/{requestId}")
+    public ItemRequestResponseWithItems getRequestById(@RequestHeader(X_SHARER_USER_ID) long userId,
+                                                       @PathVariable long requestId) {
+        log.info("Получен запрос GET /requests/{} от на получение запроса вещи от пользователя с id={}", requestId, userId);
+        final ItemRequestResponseWithItems response = requestService.getRequestById(userId, requestId);
+        log.info("В ответ на запрос GET /requests/{} возвращаем данные запроса: {}", requestId, response);
+        return response;
     }
 }

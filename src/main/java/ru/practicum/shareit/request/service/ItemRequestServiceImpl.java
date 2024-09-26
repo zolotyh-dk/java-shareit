@@ -48,7 +48,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException("Пользователь с id = " + requestorId + " не найден");
         }
 
-        final Collection<ItemRequest> allRequests = requestRepository.findByRequestorIdOrderByCreated(requestorId);
+        final Collection<ItemRequest> allRequests = requestRepository.findByRequestorIdOrderByCreatedDesc(requestorId);
         if (allRequests.isEmpty()) {
             return Collections.emptyList();
         }
@@ -68,5 +68,21 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                     .toList();
             return ItemRequestMapper.toResponseWithItems(request, itemResponses);
         }).toList();
+    }
+
+    @Override
+    public Collection<ItemRequestResponse> getAll(long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
+        }
+        final Collection<ItemRequest> itemRequests = requestRepository.findAllExcludingRequestor(userId);
+        return itemRequests.stream()
+                .map(ItemRequestMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    public ItemRequestResponseWithItems getRequestById(long userId, long requestId) {
+        return null;
     }
 }

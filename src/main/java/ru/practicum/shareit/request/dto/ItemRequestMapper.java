@@ -25,8 +25,9 @@ public class ItemRequestMapper {
         return entity;
     }
 
-    public static ItemRequestResponseWithItems toResponseWithItems(ItemRequest itemRequest,
-                                                     List<ItemForItemRequest> items) {
+    public static ItemRequestResponseWithItems toResponseWithItems(
+            ItemRequest itemRequest,
+            List<ItemForItemRequest> items) {
         return new ItemRequestResponseWithItems(
                 itemRequest.getId(),
                 itemRequest.getDescription(),

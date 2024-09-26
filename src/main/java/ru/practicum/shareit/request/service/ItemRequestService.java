@@ -10,4 +10,8 @@ public interface ItemRequestService {
     ItemRequestResponse save(ItemRequestCreate request, long requestorId);
 
     Collection<ItemRequestResponseWithItems> getAllByRequestor(long requestorId);
+
+    Collection<ItemRequestResponse> getAll(long userId);
+
+    ItemRequestResponseWithItems getRequestById(long userId, long requestId);
 }
