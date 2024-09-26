@@ -32,11 +32,20 @@ public class ItemMapper {
         );
     }
 
-    public Item requestToItem(ItemRequest request) {
+    public Item toItem(ItemRequest request, ru.practicum.shareit.request.model.ItemRequest itemRequest) {
         final Item item = new Item();
         item.setName(request.getName());
         item.setDescription(request.getDescription());
         item.setAvailable(request.getAvailable());
+        item.setRequest(itemRequest);
         return item;
+    }
+
+    public ItemForItemRequest toItemForItemRequest(Item item) {
+        return new ItemForItemRequest(
+                item.getId(),
+                item.getName(),
+                item.getOwner().getId()
+        );
     }
 }

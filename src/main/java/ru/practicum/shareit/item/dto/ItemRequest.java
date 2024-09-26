@@ -22,5 +22,5 @@ public class ItemRequest {
     @NotNull(groups = {Create.class}, message = "Доступность вещи не может быть null")
     private Boolean available;
 
-    private Long requestId;
+    private long requestId;
 }

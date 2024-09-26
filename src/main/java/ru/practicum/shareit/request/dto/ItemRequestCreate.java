@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemRequestCreateDto {
+public class ItemRequestCreate {
     @NotBlank(message = "Описание запроса вещи не может быть пустым")
     @Size(max = 1000, message = "Описание не может превышать 1000 символов")
     String description;

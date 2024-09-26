@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Collection<Item> findByOwnerId(Long ownerId);
@@ -16,4 +17,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             OR UPPER(i.description) LIKE UPPER(CONCAT('%', ?1, '%')))
             """)
     Collection<Item> searchByNameOrDescription(String text);
+
+    Collection<Item> findByRequestIdIn(Set<Long> requestIds);
 }
