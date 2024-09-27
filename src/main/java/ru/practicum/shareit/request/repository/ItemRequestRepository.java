@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
     Collection<ItemRequest> findByRequestorIdOrderByCreatedDesc(long requestorId);
@@ -16,6 +15,4 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> 
             ORDER BY r.created DESC
             """)
     Collection<ItemRequest> findAllExcludingRequestor(long userId);
-
-    Optional<ItemRequest> findById(long id);
 }

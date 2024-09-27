@@ -83,6 +83,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestResponseWithItems getRequestById(long userId, long requestId) {
-        return null;
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
+        }
+        final ItemRequest itemRequest = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос вещи с id=" + requestId + " не найден"));
+        final Collection<Item> relatedItems = itemRepository.findByRequestId(requestId);
+        final List<ItemForItemRequest> itemDtos = relatedItems.stream()
+                .map(ItemMapper::toItemForItemRequest)
+                .toList();
+        return ItemRequestMapper.toResponseWithItems(itemRequest, itemDtos);
     }
 }

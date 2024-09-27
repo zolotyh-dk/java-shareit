@@ -42,8 +42,12 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponse save(ItemRequest request, long ownerId) {
         final User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + ownerId + " не найден"));
-        final ru.practicum.shareit.request.model.ItemRequest itemRequest = requestRepository.findById(request.getRequestId())
-                        .orElseThrow(() -> new NotFoundException("Запрос вещи с id=" + request.getRequestId() + " не найден"));
+        ru.practicum.shareit.request.model.ItemRequest itemRequest =
+                request.getRequestId() != null ?
+                requestRepository.findById(request.getRequestId()).orElseThrow(() ->
+                        new NotFoundException("Запрос вещи с id=" + request.getRequestId() + " не найден"))
+                : null;
+
         final Item item = ItemMapper.toItem(request, itemRequest);
         item.setOwner(owner);
         log.debug("Преобразовали ItemDto -> {}", item);
