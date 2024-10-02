@@ -307,6 +307,133 @@ public class BookingServiceTest {
     }
 
     @Test
+    public void testGetAllBookingsByBookerWaitingState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking waitingBooking = new Booking();
+        waitingBooking.setItem(savedItem);
+        waitingBooking.setBooker(savedBooker);
+        waitingBooking.setStart(Instant.now().plusSeconds(3600));
+        waitingBooking.setEnd(Instant.now().plusSeconds(7200));
+        waitingBooking.setStatus(BookingStatus.WAITING);
+        bookingRepository.save(waitingBooking);
+
+        Collection<BookingResponse> waitingBookings = bookingService.getByBookerAndState(BookingState.WAITING, savedBooker.getId());
+        assertThat(waitingBookings.size(), equalTo(1));
+        assertThat(waitingBookings.iterator().next().getId(), equalTo(waitingBooking.getId()));
+    }
+
+    @Test
+    public void testGetAllBookingsByBookerRejectedState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking rejectedBooking = new Booking();
+        rejectedBooking.setItem(savedItem);
+        rejectedBooking.setBooker(savedBooker);
+        rejectedBooking.setStart(Instant.now().plusSeconds(3600));
+        rejectedBooking.setEnd(Instant.now().plusSeconds(7200));
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        Collection<BookingResponse> rejectedBookings = bookingService.getByBookerAndState(BookingState.REJECTED, savedBooker.getId());
+        assertThat(rejectedBookings.size(), equalTo(1));
+        assertThat(rejectedBookings.iterator().next().getId(), equalTo(rejectedBooking.getId()));
+    }
+
+    @Test
+    public void testGetAllBookingsByBookerAllState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking pastBooking = new Booking();
+        pastBooking.setItem(savedItem);
+        pastBooking.setBooker(savedBooker);
+        pastBooking.setStart(Instant.now().minusSeconds(7200));
+        pastBooking.setEnd(Instant.now().minusSeconds(3600));
+        pastBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(pastBooking);
+
+        Booking currentBooking = new Booking();
+        currentBooking.setItem(savedItem);
+        currentBooking.setBooker(savedBooker);
+        currentBooking.setStart(Instant.now().minusSeconds(3600));
+        currentBooking.setEnd(Instant.now().plusSeconds(3600));
+        currentBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(currentBooking);
+
+        Booking futureBooking = new Booking();
+        futureBooking.setItem(savedItem);
+        futureBooking.setBooker(savedBooker);
+        futureBooking.setStart(Instant.now().plusSeconds(3600));
+        futureBooking.setEnd(Instant.now().plusSeconds(7200));
+        futureBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(futureBooking);
+
+        Booking waitingBooking = new Booking();
+        waitingBooking.setItem(savedItem);
+        waitingBooking.setBooker(savedBooker);
+        waitingBooking.setStart(Instant.now().plusSeconds(7200));
+        waitingBooking.setEnd(Instant.now().plusSeconds(10800));
+        waitingBooking.setStatus(BookingStatus.WAITING);
+        bookingRepository.save(waitingBooking);
+
+        Booking rejectedBooking = new Booking();
+        rejectedBooking.setItem(savedItem);
+        rejectedBooking.setBooker(savedBooker);
+        rejectedBooking.setStart(Instant.now().plusSeconds(7200));
+        rejectedBooking.setEnd(Instant.now().plusSeconds(10800));
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        Collection<BookingResponse> allBookings = bookingService.getByBookerAndState(BookingState.ALL, savedBooker.getId());
+        assertThat(allBookings.size(), equalTo(5));
+    }
+
+    @Test
     public void testGetAllBookingsByOwnerWithDifferentStates() {
         User owner = new User();
         owner.setName("Владелец");
@@ -360,5 +487,132 @@ public class BookingServiceTest {
         Collection<BookingResponse> futureBookings = bookingService.getByOwnerAndState(BookingState.FUTURE, savedOwner.getId());
         assertThat(futureBookings.size(), equalTo(1));
         assertThat(futureBookings.iterator().next().getId(), equalTo(futureBooking.getId()));
+    }
+
+    @Test
+    public void testGetAllBookingsByOwnerWaitingState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking waitingBooking = new Booking();
+        waitingBooking.setItem(savedItem);
+        waitingBooking.setBooker(savedBooker);
+        waitingBooking.setStart(Instant.now().plusSeconds(3600));
+        waitingBooking.setEnd(Instant.now().plusSeconds(7200));
+        waitingBooking.setStatus(BookingStatus.WAITING);
+        bookingRepository.save(waitingBooking);
+
+        Collection<BookingResponse> waitingBookings = bookingService.getByOwnerAndState(BookingState.WAITING, savedOwner.getId());
+        assertThat(waitingBookings.size(), equalTo(1));
+        assertThat(waitingBookings.iterator().next().getId(), equalTo(waitingBooking.getId()));
+    }
+
+    @Test
+    public void testGetAllBookingsByOwnerRejectedState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking rejectedBooking = new Booking();
+        rejectedBooking.setItem(savedItem);
+        rejectedBooking.setBooker(savedBooker);
+        rejectedBooking.setStart(Instant.now().plusSeconds(3600));
+        rejectedBooking.setEnd(Instant.now().plusSeconds(7200));
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        Collection<BookingResponse> rejectedBookings = bookingService.getByOwnerAndState(BookingState.REJECTED, savedOwner.getId());
+        assertThat(rejectedBookings.size(), equalTo(1));
+        assertThat(rejectedBookings.iterator().next().getId(), equalTo(rejectedBooking.getId()));
+    }
+
+    @Test
+    public void testGetAllBookingsByOwnerAllState() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Вещь");
+        item.setDescription("Описание вещи");
+        item.setAvailable(true);
+        item.setOwner(savedOwner);
+        Item savedItem = itemRepository.save(item);
+
+        Booking pastBooking = new Booking();
+        pastBooking.setItem(savedItem);
+        pastBooking.setBooker(savedBooker);
+        pastBooking.setStart(Instant.now().minusSeconds(7200));
+        pastBooking.setEnd(Instant.now().minusSeconds(3600));
+        pastBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(pastBooking);
+
+        Booking currentBooking = new Booking();
+        currentBooking.setItem(savedItem);
+        currentBooking.setBooker(savedBooker);
+        currentBooking.setStart(Instant.now().minusSeconds(3600));
+        currentBooking.setEnd(Instant.now().plusSeconds(3600));
+        currentBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(currentBooking);
+
+        Booking futureBooking = new Booking();
+        futureBooking.setItem(savedItem);
+        futureBooking.setBooker(savedBooker);
+        futureBooking.setStart(Instant.now().plusSeconds(3600));
+        futureBooking.setEnd(Instant.now().plusSeconds(7200));
+        futureBooking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(futureBooking);
+
+        Booking waitingBooking = new Booking();
+        waitingBooking.setItem(savedItem);
+        waitingBooking.setBooker(savedBooker);
+        waitingBooking.setStart(Instant.now().plusSeconds(7200));
+        waitingBooking.setEnd(Instant.now().plusSeconds(10800));
+        waitingBooking.setStatus(BookingStatus.WAITING);
+        bookingRepository.save(waitingBooking);
+
+        Booking rejectedBooking = new Booking();
+        rejectedBooking.setItem(savedItem);
+        rejectedBooking.setBooker(savedBooker);
+        rejectedBooking.setStart(Instant.now().plusSeconds(7200));
+        rejectedBooking.setEnd(Instant.now().plusSeconds(10800));
+        rejectedBooking.setStatus(BookingStatus.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        Collection<BookingResponse> allBookings = bookingService.getByOwnerAndState(BookingState.ALL, savedOwner.getId());
+        assertThat(allBookings.size(), equalTo(5));
     }
 }
