@@ -13,7 +13,7 @@ class ItemRequestTest {
     void testEqualsAndHashCode() {
         User requestor = new User();
         requestor.setId(1L);
-        
+
         ItemRequest request1 = new ItemRequest(1L, "Запрос на вещь", requestor, Instant.now());
         ItemRequest request2 = new ItemRequest(1L, "Запрос на вещь", requestor, Instant.now());
         ItemRequest request3 = new ItemRequest(2L, "Другой запрос", requestor, Instant.now());

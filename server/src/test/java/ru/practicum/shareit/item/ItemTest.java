@@ -12,7 +12,7 @@ class ItemTest {
     void testEqualsAndHashCode() {
         User owner = new User();
         owner.setId(1L);
-        
+
         Item item1 = new Item(1L, "Вещь", "Описание вещи", true, owner, null);
         Item item2 = new Item(1L, "Вещь", "Описание вещи", true, owner, null);
         Item item3 = new Item(2L, "Другая вещь", "Описание другой вещи", true, owner, null);

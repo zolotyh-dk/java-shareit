@@ -14,10 +14,10 @@ class CommentTest {
     void testEqualsAndHashCode() {
         User author = new User();
         author.setId(1L);
-        
+
         Item item = new Item();
         item.setId(1L);
-        
+
         Comment comment1 = new Comment(1L, "Отличная вещь!", item, author, Instant.now());
         Comment comment2 = new Comment(1L, "Отличная вещь!", item, author, Instant.now());
         Comment comment3 = new Comment(2L, "Отличная вещь!", item, author, Instant.now());

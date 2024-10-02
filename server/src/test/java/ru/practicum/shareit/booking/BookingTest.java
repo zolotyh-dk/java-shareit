@@ -15,10 +15,10 @@ class BookingTest {
     void testEqualsAndHashCode() {
         User booker = new User();
         booker.setId(1L);
-        
+
         Item item = new Item();
         item.setId(1L);
-        
+
         Booking booking1 = new Booking(1L, Instant.now(), Instant.now().plusSeconds(3600), item, booker, BookingStatus.APPROVED);
         Booking booking2 = new Booking(1L, Instant.now(), Instant.now().plusSeconds(3600), item, booker, BookingStatus.APPROVED);
         Booking booking3 = new Booking(2L, Instant.now(), Instant.now().plusSeconds(3600), item, booker, BookingStatus.APPROVED);
