@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.ShareItServer;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemForItemRequest;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -24,11 +25,12 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest(classes = ShareItServer.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ItemRequestServiceIntegrationTest {
+public class ItemRequestServiceTest {
     private final ItemRequestService requestService;
     private final ItemRequestRepository requestRepository;
     private final UserRepository userRepository;
@@ -49,6 +51,14 @@ public class ItemRequestServiceIntegrationTest {
 
         ItemRequest savedRequest = requestRepository.findById(response.getId()).orElseThrow();
         assertThat(savedRequest.getDescription(), equalTo(request.getDescription()));
+    }
+
+    @Test
+    public void testSaveItemRequestWithNonExistentUser() {
+        ItemRequestWebRequest request = new ItemRequestWebRequest("Нужен ноутбук");
+        long nonExistentUserId = 999L;
+
+        assertThrows(NotFoundException.class, () -> requestService.save(request, nonExistentUserId));
     }
 
     @Test
@@ -99,6 +109,24 @@ public class ItemRequestServiceIntegrationTest {
     }
 
     @Test
+    public void testGetAllRequestsByNonExistentUser() {
+        long nonExistentUserId = 999L;
+
+        assertThrows(NotFoundException.class, () -> requestService.getAllByRequestor(nonExistentUserId));
+    }
+
+    @Test
+    public void testGetAllRequestsWhenNoneExist() {
+        User requestor = new User();
+        requestor.setName("Запросчик");
+        requestor.setEmail("requestor@test.com");
+        User savedRequestor = userRepository.save(requestor);
+
+        Collection<ItemRequestWebResponseWithItems> requests = requestService.getAllByRequestor(savedRequestor.getId());
+        assertThat(requests.size(), equalTo(0));
+    }
+
+    @Test
     public void testGetRequestById() {
         User requestor = new User();
         requestor.setName("Запросчик");
@@ -129,5 +157,34 @@ public class ItemRequestServiceIntegrationTest {
         List<ItemForItemRequest> items = response.getItems();
         assertThat(items.size(), equalTo(1));
         assertThat(items.get(0).getName(), equalTo("Ноутбук"));
+    }
+
+    @Test
+    public void testGetRequestByIdWithNonExistentUser() {
+        User requestor = new User();
+        requestor.setName("Запросчик");
+        requestor.setEmail("requestor@test.com");
+        User savedRequestor = userRepository.save(requestor);
+
+        ItemRequest request = new ItemRequest();
+        request.setDescription("Нужен ноутбук");
+        request.setRequestor(savedRequestor);
+        ItemRequest savedRequest = requestRepository.save(request);
+
+        long nonExistentUserId = 999L;
+
+        assertThrows(NotFoundException.class, () -> requestService.getRequestById(nonExistentUserId, savedRequest.getId()));
+    }
+
+    @Test
+    public void testGetRequestByIdWithNonExistentRequest() {
+        User requestor = new User();
+        requestor.setName("Запросчик");
+        requestor.setEmail("requestor@test.com");
+        User savedRequestor = userRepository.save(requestor);
+
+        long nonExistentRequestId = 999L;
+
+        assertThrows(NotFoundException.class, () -> requestService.getRequestById(savedRequestor.getId(), nonExistentRequestId));
     }
 }
