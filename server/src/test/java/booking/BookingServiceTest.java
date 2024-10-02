@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.exception.InvalidBookingDateException;
+import ru.practicum.shareit.exception.ItemNotAvailable;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UnauthorizedAccessException;
 import ru.practicum.shareit.item.model.Item;
@@ -118,6 +119,35 @@ public class BookingServiceTest {
 
         assertThrows(NotFoundException.class, () -> bookingService.book(bookingRequest, savedBooker.getId()));
     }
+
+    @Test
+    public void testBookUnavailableItem() {
+        User owner = new User();
+        owner.setName("Владелец");
+        owner.setEmail("owner@test.com");
+        User savedOwner = userRepository.save(owner);
+
+        User booker = new User();
+        booker.setName("Арендатор");
+        booker.setEmail("booker@test.com");
+        User savedBooker = userRepository.save(booker);
+
+        Item item = new Item();
+        item.setName("Недоступная вещь");
+        item.setDescription("Описание недоступной вещи");
+        item.setAvailable(false);
+        item.setOwner(savedOwner);
+        itemRepository.save(item);
+
+        BookingRequest bookingRequest = new BookingRequest(
+                item.getId(),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2)
+        );
+
+        assertThrows(ItemNotAvailable.class, () -> bookingService.book(bookingRequest, savedBooker.getId()));
+    }
+
 
     @Test
     public void testUpdateBookingStatus() {
