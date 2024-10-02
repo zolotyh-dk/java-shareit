@@ -18,20 +18,20 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemResponse save(@RequestBody ItemRequest request,
-                             @RequestHeader(X_SHARER_USER_ID) long ownerId) {
+    public ItemWebResponse save(@RequestBody ItemWebRequest request,
+                                @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос POST /items на сохранение вещи {}", request);
-        final ItemResponse response = itemService.save(request, ownerId);
+        final ItemWebResponse response = itemService.save(request, ownerId);
         log.info("В ответ на запрос POST /items возвращаем вещь {}", response);
         return response;
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponse update(@RequestBody ItemRequest request,
-                               @PathVariable long itemId,
-                               @RequestHeader(X_SHARER_USER_ID) long ownerId) {
+    public ItemWebResponse update(@RequestBody ItemWebRequest request,
+                                  @PathVariable long itemId,
+                                  @RequestHeader(X_SHARER_USER_ID) long ownerId) {
         log.info("Получен запрос PATCH /items/{} на обновление вещи {}", itemId, request);
-        final ItemResponse response = itemService.update(request, itemId, ownerId);
+        final ItemWebResponse response = itemService.update(request, itemId, ownerId);
         log.info("В ответ на запрос PATCH /items/{} возвращаем вещь {}", itemId, response);
         return response;
     }
@@ -53,9 +53,9 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemResponse> getByNameOrDescription(@RequestParam String text) {
+    public Collection<ItemWebResponse> getByNameOrDescription(@RequestParam String text) {
         log.info("Получен запрос GET /items/search?text={} на получение вещей по названию или описанию", text);
-        final Collection<ItemResponse> items = itemService.getByNameOrDescription(text);
+        final Collection<ItemWebResponse> items = itemService.getByNameOrDescription(text);
         log.info("В ответ на запрос GET /items/search?text={} возвращаем вещи {}", text, items);
         return items;
     }

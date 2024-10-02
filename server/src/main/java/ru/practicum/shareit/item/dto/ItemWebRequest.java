@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ItemResponse {
-    private long id;
+public class ItemWebRequest {
     private String name;
     private String description;
     private Boolean available;

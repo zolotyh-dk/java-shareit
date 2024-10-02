@@ -36,8 +36,8 @@ public class ItemControllerTest {
     @Autowired
     private ObjectMapper mapper;
 
-    private final ItemRequest itemRequest = new ItemRequest("Название вещи", "Описание вещи", true, null);
-    private final ItemResponse itemResponse = new ItemResponse(1L, "Название вещи", "Описание вещи", true, null);
+    private final ItemWebRequest itemRequest = new ItemWebRequest("Название вещи", "Описание вещи", true, null);
+    private final ItemWebResponse itemResponse = new ItemWebResponse(1L, "Название вещи", "Описание вещи", true, null);
     private final ItemDetailResponse itemDetailResponse = new ItemDetailResponse(
             1L, "Название вещи", "Описание вещи", true, null, null, null, Collections.emptyList());
     private final CommentRequest commentRequest = new CommentRequest("Крайне полезная вещь!");
@@ -45,7 +45,7 @@ public class ItemControllerTest {
 
     @Test
     public void testSaveItem() throws Exception {
-        Mockito.when(itemService.save(any(ItemRequest.class), eq(1L))).thenReturn(itemResponse);
+        Mockito.when(itemService.save(any(ItemWebRequest.class), eq(1L))).thenReturn(itemResponse);
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ public class ItemControllerTest {
 
     @Test
     public void testUpdateItem() throws Exception {
-        Mockito.when(itemService.update(any(ItemRequest.class), eq(1L), eq(1L))).thenReturn(itemResponse);
+        Mockito.when(itemService.update(any(ItemWebRequest.class), eq(1L), eq(1L))).thenReturn(itemResponse);
 
         mockMvc.perform(patch("/items/{itemId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -9,8 +9,8 @@ import java.util.List;
 
 @UtilityClass
 public class ItemMapper {
-    public ItemResponse toItemResponse(Item item) {
-        return new ItemResponse(
+    public ItemWebResponse toItemResponse(Item item) {
+        return new ItemWebResponse(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -32,7 +32,7 @@ public class ItemMapper {
         );
     }
 
-    public Item toItem(ItemRequest request, ru.practicum.shareit.request.model.ItemRequest itemRequest) {
+    public Item toItem(ItemWebRequest request, ru.practicum.shareit.request.model.ItemRequest itemRequest) {
         final Item item = new Item();
         item.setName(request.getName());
         item.setDescription(request.getDescription());

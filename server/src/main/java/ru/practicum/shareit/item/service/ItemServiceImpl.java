@@ -39,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRequestRepository requestRepository;
 
     @Override
-    public ItemResponse save(ItemRequest request, long ownerId) {
+    public ItemWebResponse save(ItemWebRequest request, long ownerId) {
         final User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + ownerId + " не найден"));
         ru.practicum.shareit.request.model.ItemRequest itemRequest =
@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemResponse update(ItemRequest request, long itemId, long ownerId) {
+    public ItemWebResponse update(ItemWebRequest request, long itemId, long ownerId) {
         final Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с id: " + itemId + " не найдена"));
         if (item.getOwner().getId() != ownerId) {
@@ -150,7 +150,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ItemResponse> getByNameOrDescription(String text) {
+    public Collection<ItemWebResponse> getByNameOrDescription(String text) {
         if (text.isBlank()) {
             log.info("Получили в запросе пустую строку, возвращаем пустой список");
             return Collections.emptyList();

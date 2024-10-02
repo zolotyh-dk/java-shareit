@@ -6,15 +6,15 @@ import java.util.Collection;
 
 public interface ItemService {
 
-    ItemResponse save(ItemRequest request, long ownerId);
+    ItemWebResponse save(ItemWebRequest request, long ownerId);
 
-    ItemResponse update(ItemRequest request, long itemId, long ownerId);
+    ItemWebResponse update(ItemWebRequest request, long itemId, long ownerId);
 
     ItemDetailResponse getById(long itemId);
 
     Collection<ItemDetailResponse> getAll(long ownerId);
 
-    Collection<ItemResponse> getByNameOrDescription(String text);
+    Collection<ItemWebResponse> getByNameOrDescription(String text);
 
     CommentResponse addComment(long itemId, long userId, CommentRequest request);
 }

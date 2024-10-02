@@ -15,7 +15,7 @@ import ru.practicum.shareit.booking.dto.BookingRequest;
 import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.enums.BookingState;
 import ru.practicum.shareit.booking.enums.BookingStatus;
-import ru.practicum.shareit.item.dto.ItemResponse;
+import ru.practicum.shareit.item.dto.ItemWebResponse;
 import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -52,7 +52,7 @@ public class BookingControllerTest {
             1L,
             LocalDateTime.of(2024, 10, 1, 10, 0, 0),
             LocalDateTime.of(2024, 10, 1, 12, 0, 0),
-            new ItemResponse(1L, "Название вещи", "Описание вещи", true, null),
+            new ItemWebResponse(1L, "Название вещи", "Описание вещи", true, null),
             new UserResponse(1L, "Пользователь", "user@test.com"),
             BookingStatus.APPROVED
     );
